@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<robot name="aimen_workcell" xmlns:xacro="http://ros.org/wiki/xacro">
+  <property name="pi" value="3.141592654" />
+
+  <link name="world" />
+
+  <!-- Robot -->
+  <xacro:include filename="$(find aimen_workcell)/urdf/abb_robot.xacro"/>
+
+  <joint name="world-abb_robot" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.067" rpy="0 0 0" />
+  </joint>
+
+  <!-- Cell walls -->
+  <link name="walls">
+  <visual>
+    <geometry>
+      <mesh filename="package://aimen_workcell/meshes/cell/cell.stl"/>
+    </geometry>
+    <origin xyz="0 0 0" />
+    <material name="white">
+      <color rgba="1 1 1 0.75"/>
+    </material>
+  </visual>
+  </link>
+
+  <joint name="world_to_walls" type="fixed">
+    <parent link="world" />
+    <child link="walls" />
+    <origin xyz="0 0 0" />
+  </joint>
+
+</robot>
