@@ -108,7 +108,7 @@
     <axis xyz="0 0 1" />
     <limit effort="100" velocity="3.1416" />
   </joint>
-  <joint name="${name}joint4-tool0" type="fixed">
+  <joint name="${name}tool0" type="fixed">
     <parent link="${name}link_4" />
     <child link="${name}tool0" />
     <origin rpy="0 0 0" xyz="0 0 0" />
