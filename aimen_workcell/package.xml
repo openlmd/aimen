@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
   <name>aimen_workcell</name>
-  <version>0.3.0</version>
-  <description>The aimen workcell package</description>
+  <version>0.4.0</version>
+  <description>The aimen_workcell package</description>
   <author email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</author>
   <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
   <license>BSD</license>

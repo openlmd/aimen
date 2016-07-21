@@ -3,7 +3,7 @@
     <property name="pi" value="3.141592654"/>
 
     <!-- Robot -->
-    <xacro:include filename="$(find abb_irb4400_support)/urdf/irb4400_macro.xacro"/>
+    <xacro:include filename="$(find aimen_abb)/urdf/irb4400_macro.xacro"/>
     <xacro:abb_irb4400 prefix=""/>
 
     <joint name="irb4400" type="fixed">

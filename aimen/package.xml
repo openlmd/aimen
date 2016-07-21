@@ -1,14 +1,17 @@
 <package>
   <name>aimen</name>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
   <description>This package provides aimen packages.</description>
   <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
   <license>BSD</license>
 
+  <url type="website">http://openlmd.github.io/aimen.html</url>
+  <url type="repository">https://github.com/openlmd/aimen</url>
+
   <buildtool_depend>catkin</buildtool_depend>
 
-  <!-- <run_depend>aimen_abb</run_depend> -->
-  <!-- <run_depend>aimen_driver</run_depend> -->
+  <run_depend>aimen_abb</run_depend>
+  <run_depend>aimen_driver</run_depend>
   <run_depend>aimen_workcell</run_depend>
 
   <export>
