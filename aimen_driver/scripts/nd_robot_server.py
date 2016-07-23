@@ -43,10 +43,6 @@ class NdRobotServer():
                 self.server_robot.workobject(command[cmd])
             elif cmd == 'speed':
                 self.server_robot.speed(command[cmd])
-            elif cmd == 'power':
-                self.server_robot.set_group((11, 0))  # laser program 11
-                pwr = int((command[cmd] * 65535) / 1500)  # digital value
-                self.server_robot.set_group((pwr, 1))  # laser power
             elif cmd == 'pose':
                 self.server_robot.buffer_pose(command[cmd])
             elif cmd == 'move':
@@ -60,11 +56,29 @@ class NdRobotServer():
                     self.server_robot.buffer_execute()
             elif cmd == 'path_clear':
                 self.server_robot.clear_buffer()
-            elif cmd == 'powder_start':
+            elif cmd == 'get_pose':
+                return self.server_robot.get_cartesian()
+            elif cmd == 'wait_time':
+                self.server_robot.wait_time(command[cmd])
+            elif cmd == 'laser':
                 if command[cmd]:
+                    self.server_robot.set_digital((1, 2))  # laser_main: 1
+                    self.server_robot.set_digital((1, 3))  # laser_standby: 1
+                    self.server_robot.wait_input(1, 0)  # wait_standby: 1
+                    self.server_robot.wait_input(0, 1)  # wait_generalfault: 0
+                else:
+                    self.server_robot.set_digital((0, 3))  # laser_standby: 0
+            elif cmd == 'power':
+                self.server_robot.set_group((11, 0))  # laser program 11
+                pwr = int((command[cmd] * 65535) / 1500)  # digital value
+                self.server_robot.set_group((pwr, 1))  # laser power
+            elif cmd == 'powder':
+                if command[cmd]:
+                    self.server_robot.set_digital((1, 4))  # weldgas: 1
                     self.server_robot.set_digital((0, 1))  # gtv_stop
                     self.server_robot.set_digital((1, 0))  # gtv_start
                 else:
+                    self.server_robot.set_digital((0, 4))  # weldgas: 0
                     self.server_robot.set_digital((1, 1))  # gtv_stop
                     self.server_robot.set_digital((0, 0))  # gtv_start
             elif cmd == 'carrier':
@@ -75,22 +89,8 @@ class NdRobotServer():
                 self.server_robot.set_analog((turntable, 0))  # gtv_disk
             elif cmd == 'stirrer':
                 stirrer = int((command[cmd] * 100) / 100)
-            elif cmd == 'get_pose':
-                return self.server_robot.get_cartesian()
-            elif cmd == 'wait_time':
-                self.server_robot.wait_time(command[cmd])
-            elif cmd == 'wait_standby':
-                self.server_robot.wait_input(command[cmd], 0)
-            elif cmd == 'wait_generalfault':
-                self.server_robot.wait_input(command[cmd], 1)
-            elif cmd == 'laser_main':
-                self.server_robot.set_digital((command[cmd], 2))
-            elif cmd == 'laser_standby':
-                self.server_robot.set_digital((command[cmd], 3))
-            elif cmd == 'weldgas':
-                self.server_robot.set_digital((command[cmd], 4))
-            elif cmd == 'rootgas':
-                self.server_robot.set_digital((command[cmd], 5))
+            # elif cmd == 'rootgas':
+            #     self.server_robot.set_digital((command[cmd], 5))
             elif cmd == 'cancel':
                 self.server_robot.cancel_motion()
             else:
