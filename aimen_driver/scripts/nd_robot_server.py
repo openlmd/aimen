@@ -58,8 +58,10 @@ class NdRobotServer():
                 self.server_robot.clear_buffer()
             elif cmd == 'get_pose':
                 return self.server_robot.get_cartesian()
-            elif cmd == 'wait_time':
+            elif cmd == 'wait':
                 self.server_robot.wait_time(command[cmd])
+            elif cmd == 'program':
+                self.server_robot.set_group((command[cmd], 0))  # laser program 11
             elif cmd == 'laser':
                 if command[cmd]:
                     self.server_robot.set_digital((1, 2))  # laser_main: 1
