@@ -80,9 +80,9 @@ class NdRobotServer():
                     self.server_robot.set_digital((0, 1))  # gtv_stop
                     self.server_robot.set_digital((1, 0))  # gtv_start
                 else:
-                    self.server_robot.set_digital((0, 4))  # weldgas: 0
                     self.server_robot.set_digital((1, 1))  # gtv_stop
                     self.server_robot.set_digital((0, 0))  # gtv_start
+                    self.server_robot.set_digital((0, 4))  # weldgas: 0
             elif cmd == 'carrier':
                 carrier = int((command[cmd] * 100) / 15)  # digital value
                 self.server_robot.set_analog((carrier, 1))  # gtv_massflow
