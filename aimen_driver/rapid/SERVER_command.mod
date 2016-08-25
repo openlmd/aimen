@@ -563,6 +563,23 @@ PROC main()
                       ELSE
                           ok := SERVER_BAD_MSG;
                       ENDIF
+            CASE 101: !RESET laser
+              IF nParams = 0 THEN
+                SetDO Do_FL_RayoLaserEnc, 0;
+                SetDO Do_FL_StandByEnc, 0;
+                ok := SERVER_OK;
+              ELSE
+                ok := SERVER_BAD_MSG;
+              ENDIF
+            CASE 102: !RESET powder
+              IF nParams = 0 THEN
+                SetDO doGTV_StartExtern, 0;
+                SetDO DoWeldGas, 0;
+                SetDO doGTV_Stop, 1;
+                ok := SERVER_OK;
+              ELSE
+                ok := SERVER_BAD_MSG;
+              ENDIF
                   DEFAULT:
                       TPWrite "SERVER: Illegal instruction code";
                       ok := SERVER_BAD_MSG;

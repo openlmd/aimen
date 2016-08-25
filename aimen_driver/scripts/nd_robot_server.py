@@ -83,6 +83,18 @@ class NdRobotServer():
                     self.server_robot.set_digital((1, 1))  # gtv_stop
                     self.server_robot.set_digital((0, 0))  # gtv_start
                     self.server_robot.set_digital((0, 4))  # weldgas: 0
+            elif cmd == 'weldgas':
+                if command[cmd]:
+                    self.server_robot.set_digital((1, 4))  # weldgas: 1
+                else:
+                    self.server_robot.set_digital((0, 4))  # weldgas: 0
+            elif cmd == 'gtv':
+                if command[cmd]:
+                    self.server_robot.set_digital((0, 1))  # gtv_stop
+                    self.server_robot.set_digital((1, 0))  # gtv_start
+                else:
+                    self.server_robot.set_digital((1, 1))  # gtv_stop
+                    self.server_robot.set_digital((0, 0))  # gtv_start
             elif cmd == 'carrier':
                 carrier = int((command[cmd] * 100) / 15)  # digital value
                 self.server_robot.set_analog((carrier, 1))  # gtv_massflow
@@ -95,6 +107,10 @@ class NdRobotServer():
             #     self.server_robot.set_digital((command[cmd], 5))
             elif cmd == 'cancel':
                 self.server_robot.cancel_motion()
+            elif cmd == 'reset_laser':
+                self.server_robot.reset_laser()
+            elif cmd == 'reset_powder':
+                self.server_robot.reset_powder()
             else:
                 print 'Unknown command:', cmd
 

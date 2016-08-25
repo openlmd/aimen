@@ -103,6 +103,20 @@ class Robot:
         msg = "100 #"
         return self.send(msg, response)
 
+    def reset_laser(self, response=True):
+        '''
+        Stop and reset laser signals.
+        '''
+        msg = "101 #"
+        return self.send(msg, response)
+
+    def reset_powder(self, response=True):
+        '''
+        Stop and reset powder feeder signals.
+        '''
+        msg = "102 #"
+        return self.send(msg, response)
+
     def set_cartesian(self, pose, linear=True, response=True):
         '''
         Executes a move immediately from the current pose,
