@@ -10,3 +10,7 @@ This package contains modules required to operate AIMEN's LMD robotized laser ce
 - aimen_driver: contains the RAPID driver and the required ROS nodes to command
 the robot.
 - aimen_workcell: contains the workcell description files.
+
+## JASON commands
+
+[JASON commands list](../proper/proper_jason/README.md)
