@@ -424,7 +424,7 @@ PROC main()
               IF nParams = 1 THEN
               WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
               command_type{n_cartesian_command} := 94;
-              commandWaitTime{n_cartesian_command} := params{1};
+              numBufferAux{n_cartesian_command} := params{1};
               n_cartesian_command := n_cartesian_command + 1;
               IF n_cartesian_command > 49
                 n_cartesian_command := 1;
@@ -437,12 +437,23 @@ PROC main()
           						CASE 0:
       								IF params{2} > 31
       									params{2} := 31;
-                        				SetGO GO_FL_Programa, params{2};
+                        				!SetGO GO_FL_Programa, params{2};
+                                WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                                command_type{n_cartesian_command} := 950;
+                                numBufferAux{n_cartesian_command} := params{2};
+                                n_cartesian_command := n_cartesian_command + 1;
+                                IF n_cartesian_command > 49
+                                  n_cartesian_command := 1;
       							  CASE 1:
-                        				SetGO GO_FL_PotenciaLaser1, params{2};
-
+                        				!SetGO GO_FL_PotenciaLaser1, params{2};
+                                WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                                command_type{n_cartesian_command} := 951;
+                                numBufferAux{n_cartesian_command} := params{2};
+                                n_cartesian_command := n_cartesian_command + 1;
+                                IF n_cartesian_command > 49
+                                  n_cartesian_command := 1;
           						DEFAULT:
-                        				TPWrite "SERVER: Illegal output code GO =", \Num:=params{1};
+                        				TPWrite "SERVER: Illegal output code GO = ", \Num:=params{1};
                         				ok := SERVER_BAD_MSG;
       					    ENDTEST
               ELSE
@@ -454,11 +465,23 @@ PROC main()
                 !TODO:Seleccionar o tipo de entrada
         					TEST params{1}
         						CASE 0:
-                      				SetAO AoGTV_ExternDisk, params{2};
+                      				!SetAO AoGTV_ExternDisk, params{2};
+                              WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                              command_type{n_cartesian_command} := 960;
+                              numBufferAux{n_cartesian_command} := params{2};
+                              n_cartesian_command := n_cartesian_command + 1;
+                              IF n_cartesian_command > 49
+                                n_cartesian_command := 1;
         						CASE 1:
-        							        SetAO AoGTV_ExternMassflow, params{2};
+        							        !SetAO AoGTV_ExternMassflow, params{2};
+                              WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                              command_type{n_cartesian_command} := 961;
+                              numBufferAux{n_cartesian_command} := params{2};
+                              n_cartesian_command := n_cartesian_command + 1;
+                              IF n_cartesian_command > 49
+                                n_cartesian_command := 1;
         						DEFAULT:
-                      				TPWrite "SERVER: Illegal output code AO =", \Num:=params{1};
+                      				TPWrite "SERVER: Illegal output code AO = ", \Num:=params{1};
                       ok := SERVER_BAD_MSG;
     					    ENDTEST
                 ELSE

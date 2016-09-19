@@ -28,7 +28,7 @@ PERS speeddata cartesian_speed{max_cartesian};
 PERS bool moveCompleted; !Set to true after finishing a Move instruction.
 PERS bool cartesianTriggSet{max_cartesian};
 PERS bool commandSetDO{max_cartesian};
-PERS num commandWaitTime{max_cartesian};
+PERS num numBufferAux{max_cartesian};
 PERS num extAxisMove{max_cartesian};
 
 !//Control of the laser

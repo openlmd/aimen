@@ -146,7 +146,19 @@ PROC main()
 							ENDIF
 
 						CASE 94: !Wait time
-							WaitTime commandWaitTime{n_cartesian_motion};
+							WaitTime numBufferAux{n_cartesian_motion};
+
+						CASE 950: !
+							SetGO GO_FL_Programa, numBufferAux{n_cartesian_motion};
+
+						CASE 951: !
+							SetGO GO_FL_PotenciaLaser1, numBufferAux{n_cartesian_motion};
+
+						CASE 960: !
+							SetAO AoGTV_ExternDisk, numBufferAux{n_cartesian_motion};
+
+						CASE 961 !:
+							SetAO AoGTV_ExternMassflow, numBufferAux{n_cartesian_motion};
 
 						CASE 970: !Set DO gtv START
 							IF commandSetDO{n_cartesian_motion} THEN
