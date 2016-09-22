@@ -157,7 +157,7 @@ PROC main()
 						CASE 960: !
 							SetAO AoGTV_ExternDisk, numBufferAux{n_cartesian_motion};
 
-						CASE 961 !:
+						CASE 961: !
 							SetAO AoGTV_ExternMassflow, numBufferAux{n_cartesian_motion};
 
 						CASE 970: !Set DO gtv START
