@@ -135,17 +135,22 @@ PROC main()
             CASE 1: !Cartesian Move
                 IF nParams = 7 THEN
                     ok := SERVER_OK;
-					          WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 1;
-                    cartesianTarget{n_cartesian_command} := [[params{1},params{2},params{3}],
-                                       [params{4},params{5},params{6},params{7}],
-                                       [0,0,0,0],
-                                       externalAxis];
-                    cartesian_speed{n_cartesian_command} := currentSpeed;
-                    cartesianTriggSet{n_cartesian_command} := FALSE;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
+					          !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                    IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                      command_type{n_cartesian_command} := 1;
+                      cartesianTarget{n_cartesian_command} := [[params{1},params{2},params{3}],
+                                         [params{4},params{5},params{6},params{7}],
+                                         [0,0,0,0],
+                                         externalAxis];
+                      cartesian_speed{n_cartesian_command} := currentSpeed;
+                      cartesianTriggSet{n_cartesian_command} := FALSE;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                      addString := "BUFFER_OK";
+                    ELSE
+                      addString := "BUFFER_FULL";
+                    ENDIF
                     !moveCompleted := FALSE;
                     !MoveL cartesianTarget, currentSpeed, currentZone, currentTool \WObj:=currentWobj ;
                     !moveCompleted := TRUE;
@@ -267,20 +272,25 @@ PROC main()
 			      CASE 10: !Joint Move to Pos
                 IF nParams = 7 THEN
                     ok := SERVER_OK;
-					          WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 10;
-                    cartesianTarget{n_cartesian_command} := [[params{1},params{2},params{3}],
-                                       [params{4},params{5},params{6},params{7}],
-                                       [0,0,0,0],
-                                       externalAxis];
-                    cartesian_speed{n_cartesian_command} := currentSpeed;
-                    cartesianTriggSet{n_cartesian_command} := FALSE;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                    !moveCompleted := FALSE;
-                    !MoveJ cartesianTarget, currentSpeed, currentZone, currentTool \WObj:=currentWobj ;
-                    !moveCompleted := TRUE;
+					          !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                    IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                      command_type{n_cartesian_command} := 10;
+                      cartesianTarget{n_cartesian_command} := [[params{1},params{2},params{3}],
+                                         [params{4},params{5},params{6},params{7}],
+                                         [0,0,0,0],
+                                         externalAxis];
+                      cartesian_speed{n_cartesian_command} := currentSpeed;
+                      cartesianTriggSet{n_cartesian_command} := FALSE;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                      !moveCompleted := FALSE;
+                      !MoveJ cartesianTarget, currentSpeed, currentZone, currentTool \WObj:=currentWobj ;
+                      !moveCompleted := TRUE;
+                      addString := "BUFFER_OK";
+                    ELSE
+                      addString := "BUFFER_FULL";
+                    ENDIF
                 ELSE
                     ok := SERVER_BAD_MSG;
                 ENDIF
@@ -288,29 +298,34 @@ PROC main()
             CASE 11: !Trigger Move linear
                 IF nParams = 8 THEN
                     ok := SERVER_OK;
-          					WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    IF params{8} < 1 THEN
-                      command_type{n_cartesian_command} := 110;
+          					!WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                    IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                      IF params{8} < 1 THEN
+                        command_type{n_cartesian_command} := 110;
+                      ELSE
+                        command_type{n_cartesian_command} := 111;
+  										ENDIF
+                      cartesianTarget{n_cartesian_command} := [[params{1},params{2},params{3}],
+                                         [params{4},params{5},params{6},params{7}],
+                                         [0,0,0,0],
+                                         externalAxis];
+                      cartesian_speed{n_cartesian_command} := currentSpeed;
+                      cartesianTriggSet{n_cartesian_command} := FALSE;
+                      !TPWrite "valor "\Num:=params{8};
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                      !moveCompleted := FALSE;
+  										!IF params{8} < 1 THEN
+                      !	TriggL cartesianTarget, currentSpeed, laserOFF, currentZone, currentTool \WObj:=currentWobj ;
+  										!ELSE
+  										!	TriggL cartesianTarget, currentSpeed, laserON, currentZone, currentTool \WObj:=currentWobj ;
+  										!ENDIF
+                      !moveCompleted := TRUE;
+                      addString := "BUFFER_OK";
                     ELSE
-                      command_type{n_cartesian_command} := 111;
-										ENDIF
-                    cartesianTarget{n_cartesian_command} := [[params{1},params{2},params{3}],
-                                       [params{4},params{5},params{6},params{7}],
-                                       [0,0,0,0],
-                                       externalAxis];
-                    cartesian_speed{n_cartesian_command} := currentSpeed;
-                    cartesianTriggSet{n_cartesian_command} := FALSE;
-                    !TPWrite "valor "\Num:=params{8};
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                    !moveCompleted := FALSE;
-										!IF params{8} < 1 THEN
-                    !	TriggL cartesianTarget, currentSpeed, laserOFF, currentZone, currentTool \WObj:=currentWobj ;
-										!ELSE
-										!	TriggL cartesianTarget, currentSpeed, laserON, currentZone, currentTool \WObj:=currentWobj ;
-										!ENDIF
-                    !moveCompleted := TRUE;
+                      addString := "BUFFER_FULL";
+                    ENDIF
                 ELSE
                     ok := SERVER_BAD_MSG;
                 ENDIF
@@ -318,20 +333,25 @@ PROC main()
               CASE 12: !Move external axis
         				IF nParams = 3 THEN
         					ok := SERVER_OK;
-        					WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-        					currentSpeed.v_reax := params{3};
-        					cartesian_speed{n_cartesian_command} := currentSpeed;
-        					IF params{1} = 1 THEN
-        					  command_type{n_cartesian_command} := 121;
-        					  extAxisMove{n_cartesian_command} := params{2};
-        					ENDIF
-        					IF params{1} = 2 THEN
-					          command_type{n_cartesian_command} := 122;
-						        extAxisMove{n_cartesian_command} := params{2};
-        					ENDIF
-        					n_cartesian_command := n_cartesian_command + 1;
-                  IF n_cartesian_command > 49
-                    n_cartesian_command := 1;
+        					!WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                  IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+          					currentSpeed.v_reax := params{3};
+          					cartesian_speed{n_cartesian_command} := currentSpeed;
+          					IF params{1} = 1 THEN
+          					  command_type{n_cartesian_command} := 121;
+          					  extAxisMove{n_cartesian_command} := params{2};
+          					ENDIF
+          					IF params{1} = 2 THEN
+  					          command_type{n_cartesian_command} := 122;
+  						        extAxisMove{n_cartesian_command} := params{2};
+          					ENDIF
+          					n_cartesian_command := n_cartesian_command + 1;
+                    IF n_cartesian_command > 49
+                      n_cartesian_command := 1;
+                    addString := "BUFFER_OK";
+                  ELSE
+                    addString := "BUFFER_FULL";
+                  ENDIF
                   ELSE
                     ok := SERVER_BAD_MSG;
                 ENDIF
@@ -395,67 +415,84 @@ PROC main()
               IF nParams = 2 THEN
                 !TODO:Seleccionar o tipo de entrada
                 !TPWrite "Digital output WaitDI =", \Num:=params{1};
-                TEST params{1}
-                  CASE 0:
-                    !WaitDI Di_FL_EstadBy,params{2};
-                    WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 930;
-                    commandSetDO{n_cartesian_command} := params{2} <> 0;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                  CASE 1:
-                    !WaitDI Di_FL_ErrorLaserApagado,params{2};
-                    WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 931;
-                    commandSetDO{n_cartesian_command} := params{2} <> 0;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                  DEFAULT:
-                    TPWrite "SERVER: Illegal wait code DI =", \Num:=params{1};
-                    ok := SERVER_BAD_MSG;
-                ENDTEST
+                IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                  TEST params{1}
+                    CASE 0:
+                      !WaitDI Di_FL_EstadBy,params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 930;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 1:
+                      !WaitDI Di_FL_ErrorLaserApagado,params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 931;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    DEFAULT:
+                      TPWrite "SERVER: Illegal wait code DI =", \Num:=params{1};
+                      ok := SERVER_BAD_MSG;
+                  ENDTEST
+                  addString := "BUFFER_OK";
+                ELSE
+                  addString := "BUFFER_FULL";
+                ENDIF
               ELSE
                 ok :=SERVER_BAD_MSG;
               ENDIF
 
             CASE 94: !Wait time between moves
               IF nParams = 1 THEN
-              WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-              command_type{n_cartesian_command} := 94;
-              numBufferAux{n_cartesian_command} := params{1};
-              n_cartesian_command := n_cartesian_command + 1;
-              IF n_cartesian_command > 49
-                n_cartesian_command := 1;
+                !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                  command_type{n_cartesian_command} := 94;
+                  numBufferAux{n_cartesian_command} := params{1};
+                  n_cartesian_command := n_cartesian_command + 1;
+                  IF n_cartesian_command > 49
+                    n_cartesian_command := 1;
+                  addString := "BUFFER_OK";
+                ELSE
+                  addString := "BUFFER_FULL";
+                ENDIF
+              ELSE
+                ok :=SERVER_BAD_MSG;
               ENDIF
 
       			CASE 95: !Value to GO
       				IF nParams = 2 THEN
-                      !TODO:Seleccionar o tipo de entrada
-          					TEST params{1}
-          						CASE 0:
-      								IF params{2} > 31
-      									params{2} := 31;
-                        				!SetGO GO_FL_Programa, params{2};
-                                WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                                command_type{n_cartesian_command} := 950;
-                                numBufferAux{n_cartesian_command} := params{2};
-                                n_cartesian_command := n_cartesian_command + 1;
-                                IF n_cartesian_command > 49
-                                  n_cartesian_command := 1;
-      							  CASE 1:
-                        				!SetGO GO_FL_PotenciaLaser1, params{2};
-                                WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                                command_type{n_cartesian_command} := 951;
-                                numBufferAux{n_cartesian_command} := params{2};
-                                n_cartesian_command := n_cartesian_command + 1;
-                                IF n_cartesian_command > 49
-                                  n_cartesian_command := 1;
-          						DEFAULT:
-                        				TPWrite "SERVER: Illegal output code GO = ", \Num:=params{1};
-                        				ok := SERVER_BAD_MSG;
-      					    ENDTEST
+                !TODO:Seleccionar o tipo de entrada
+                IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+            			TEST params{1}
+            				CASE 0:
+        							IF params{2} > 31
+        									params{2} := 31;
+              				!SetGO GO_FL_Programa, params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 950;
+                      numBufferAux{n_cartesian_command} := params{2};
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+        						CASE 1:
+              				!SetGO GO_FL_PotenciaLaser1, params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 951;
+                      numBufferAux{n_cartesian_command} := params{2};
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+            				DEFAULT:
+                      TPWrite "SERVER: Illegal output code GO = ", \Num:=params{1};
+                      ok := SERVER_BAD_MSG;
+        					ENDTEST
+                  addString := "BUFFER_OK";
+                ELSE
+                  addString := "BUFFER_FULL";
+                ENDIF
               ELSE
                 ok :=SERVER_BAD_MSG;
               ENDIF
@@ -463,88 +500,98 @@ PROC main()
 			      CASE 96: !Set an analog output
                 IF nParams = 2 THEN
                 !TODO:Seleccionar o tipo de entrada
-        					TEST params{1}
-        						CASE 0:
+                  IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                    TEST params{1}
+                      CASE 0:
                       				!SetAO AoGTV_ExternDisk, params{2};
-                              WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                              !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
                               command_type{n_cartesian_command} := 960;
                               numBufferAux{n_cartesian_command} := params{2};
                               n_cartesian_command := n_cartesian_command + 1;
                               IF n_cartesian_command > 49
                                 n_cartesian_command := 1;
-        						CASE 1:
+                      CASE 1:
         							        !SetAO AoGTV_ExternMassflow, params{2};
-                              WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                              !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
                               command_type{n_cartesian_command} := 961;
                               numBufferAux{n_cartesian_command} := params{2};
                               n_cartesian_command := n_cartesian_command + 1;
                               IF n_cartesian_command > 49
                                 n_cartesian_command := 1;
-        						DEFAULT:
+          						DEFAULT:
                       				TPWrite "SERVER: Illegal output code AO = ", \Num:=params{1};
-                      ok := SERVER_BAD_MSG;
-    					    ENDTEST
+                              ok := SERVER_BAD_MSG;
+    					      ENDTEST
+                    addString := "BUFFER_OK";
+                  ELSE
+                    addString := "BUFFER_FULL";
+                  ENDIF
                 ELSE
                     ok :=SERVER_BAD_MSG;
                 ENDIF
 
     		    CASE 97: !Set or reset a digital output
               IF nParams = 2 THEN
-      					!TODO:Seleccionar o tipo de entrada
-                !TPWrite "Digital output SetDO =", \Num:=params{1};
-      					TEST params{1}
-      						CASE 0:
-                    !SetDO doGTV_StartExtern, params{2};
-                    WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 970;
-                    commandSetDO{n_cartesian_command} := params{2} <> 0;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                  CASE 1:
-                    !SetDO doGTV_Stop, params{2};
-                    WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 971;
-                    commandSetDO{n_cartesian_command} := params{2} <> 0;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                  CASE 2:
-                    !SetDO Do_FL_RedENC, params{2};
-                    WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 972;
-                    commandSetDO{n_cartesian_command} := params{2} <> 0;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                  CASE 3:
-                    !SetDO Do_FL_StandByEnc, params{2};
-                    WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 973;
-                    commandSetDO{n_cartesian_command} := params{2} <> 0;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                  CASE 4:
-                    !SetDO DoWeldGas, params{2};
-                    WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 974;
-                    commandSetDO{n_cartesian_command} := params{2} <> 0;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-                  CASE 5:
-                    !SetDO DoRootGas, params{2};
-                    WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
-                    command_type{n_cartesian_command} := 975;
-                    commandSetDO{n_cartesian_command} := params{2} <> 0;
-                    n_cartesian_command := n_cartesian_command + 1;
-                    IF n_cartesian_command > 49
-                      n_cartesian_command := 1;
-      						DEFAULT:
-                		TPWrite "SERVER: Illegal output code DO =", \Num:=params{1};
-                		ok := SERVER_BAD_MSG;
-      					ENDTEST
+        				!TODO:Seleccionar o tipo de entrada
+                IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                  !TPWrite "Digital output SetDO =", \Num:=params{1};
+        					TEST params{1}
+        						CASE 0:
+                      !SetDO doGTV_StartExtern, params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 970;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 1:
+                      !SetDO doGTV_Stop, params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 971;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 2:
+                      !SetDO Do_FL_RedENC, params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 972;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 3:
+                      !SetDO Do_FL_StandByEnc, params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 973;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 4:
+                      !SetDO DoWeldGas, params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 974;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 5:
+                      !SetDO DoRootGas, params{2};
+                      !WaitUntil NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48);
+                      command_type{n_cartesian_command} := 975;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+        						DEFAULT:
+                  		TPWrite "SERVER: Illegal output code DO =", \Num:=params{1};
+                  		ok := SERVER_BAD_MSG;
+        					ENDTEST
+                  addString := "BUFFER_OK";
+                ELSE
+                  addString := "BUFFER_FULL";
+                ENDIF
               ELSE
                 ok :=SERVER_BAD_MSG;
               ENDIF

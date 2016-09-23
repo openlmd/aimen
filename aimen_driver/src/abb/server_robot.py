@@ -4,6 +4,7 @@ from abb import Robot
 class ServerRobot(Robot):
     def __init__(self):
         Robot.__init__(self)
+        self.instructionCount = 0
 
     def connect(self, ip):
         self.connect_motion((ip, 5000))
@@ -19,9 +20,10 @@ class ServerRobot(Robot):
     def workobject(self, work_obj):
         if len(work_obj) == 2:
             if (len(work_obj[0]) == 3) and (len(work_obj[1]) == 4):
-                self.set_workobject(work_obj)
+                return self.set_workobject(work_obj)
         else:
             print 'Invalid command format'
+            return ''
 
     def configure(self, filename):
         print filename
@@ -29,27 +31,30 @@ class ServerRobot(Robot):
     def move(self, pose, movel=True):
         """Linear movement to cartestian coordiantes when movel=True."""
         if len(pose) == 2:
-            self.set_cartesian(pose, linear=movel)
+            return self.set_cartesian(pose, linear=movel)
         elif len(pose) == 3:
-            self.set_cartesian_trigg(pose[:2], trigger=pose[2])
+            return self.set_cartesian_trigg(pose[:2], trigger=pose[2])
         else:
             print 'Invalid command format'
+            return ''
 
     def move_ext(self, dato):
         """Move external axis (axis, position, speed)."""
         if len(dato) == 3:
-            self.move_ext_axis(dato[0], dato[1], dato[2])
+            return self.move_ext_axis(dato[0], dato[1], dato[2])
         else:
             print 'Invalid command format'
+            return ''
 
     def speed(self, speed):
-        self.set_speed([speed, 50, 50, 100])
+        return self.set_speed([speed, 50, 50, 100])
 
     def zone(self, zone):
         if len(zone) == 3:
-            self.set_zone(manual_zone=zone)
+            return self.set_zone(manual_zone=zone)
         else:
             print 'Invalid command format'
+            return ''
 
     def set_digital(self, digital):
         """
@@ -57,9 +62,10 @@ class ServerRobot(Robot):
         Dato digital 1 = Numero de salida
         """
         if len(digital) == 2:
-            self.set_dio(digital[0], digital[1])
+            return self.set_dio(digital[0], digital[1])
         else:
             print 'Invalid command format'
+            return ''
 
     def set_analog(self, analog):
         """
@@ -70,9 +76,10 @@ class ServerRobot(Robot):
             analog = list(analog)
             if analog[0] > 100:
                 analog[0] = 100
-            self.set_ao(analog[0], analog[1])
+            return self.set_ao(analog[0], analog[1])
         else:
             print 'Invalid command format'
+            return ''
 
     def set_group(self, digital):
         if len(digital) == 2:
@@ -84,9 +91,10 @@ class ServerRobot(Robot):
                 if digital[1] == 1:
                     if digital[0] > 65535:
                         digital[0] = 65535
-                self.set_gdo(digital[0], digital[1])
+                return self.set_gdo(digital[0], digital[1])
         else:
             print 'Invalid command format'
+            return ''
 
     def buffer_pose(self, pose):
         if len(pose) == 2:
@@ -96,6 +104,84 @@ class ServerRobot(Robot):
         else:
             print 'Invalid command format'
 
+    def laser_ready(self, ready):
+        if ready:
+            if self.instructionCount == 0:
+                r = self.set_digital((1, 2))  # laser_main: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 1:
+                r = self.set_digital((1, 3))  # laser_standby: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 2:
+                r = self.wait_input(1, 0)  # wait_standby: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 3:
+                r = self.wait_input(0, 1)  # wait_generalfault: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount = 0
+                return r
+        else:
+            return self.set_digital((0, 3))  # laser_standby: 0
+
+    def laser_power(self, power):
+        self.set_group((11, 0))  # laser program 11
+        pwr = int((power * 65535) / 1500)  # digital value
+        return self.set_group((pwr, 1))  # laser power
+
+    def powder(self, state):
+        if state:
+            if self.instructionCount == 0:
+                r = self.set_digital((1, 4))  # weldgas: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 1:
+                r = self.set_digital((0, 1))  # gtv_stop
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 2:
+                r = self.set_digital((1, 0))  # gtv_start
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 0
+                return r
+        else:
+            if self.instructionCount == 0:
+                r = self.set_digital((1, 1))  # gtv_stop
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 1:
+                r = self.set_digital((0, 0))  # gtv_start
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 2:
+                r = self.set_digital((0, 4))  # weldgas: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 0
+                return r
+
+    def massflow(self, carrierflow):
+        carrier = int((carrierflow * 100) / 15)  # digital value
+        return self.set_analog((carrier, 1))  # gtv_massflow
+
+    def disk(self, turntablespeed):
+        turntable = int((turntablespeed * 100) / 10)  # digital value
+        return self.set_analog((turntable, 0))  # gtv_disk
 
 if __name__ == '__main__':
     server_robot = ServerRobot()

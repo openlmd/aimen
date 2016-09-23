@@ -29,8 +29,8 @@ class NdRobotServer():
             if 'get_pose' in command:
                 pose_rob = self.process_command(command)
                 return SrvRobotCommandResponse(str(pose_rob))
-            self.process_command(command)
-            return SrvRobotCommandResponse("OK")
+            response = self.process_command(command)
+            return SrvRobotCommandResponse(response)
         except ValueError, e:
             print "Command is not json", e
             return SrvRobotCommandResponse("NOK")
@@ -38,19 +38,19 @@ class NdRobotServer():
     def process_command(self, command):
         for cmd in sorted(command, reverse=True):
             if cmd == 'tool':
-                self.server_robot.set_tool(command[cmd])
+                return self.server_robot.set_tool(command[cmd])
             elif cmd == 'workobject':
-                self.server_robot.workobject(command[cmd])
+                return self.server_robot.workobject(command[cmd])
             elif cmd == 'speed':
-                self.server_robot.speed(command[cmd])
+                return self.server_robot.speed(command[cmd])
             elif cmd == 'pose':
-                self.server_robot.buffer_pose(command[cmd])
+                return self.server_robot.buffer_pose(command[cmd])
             elif cmd == 'move':
-                self.server_robot.move(command[cmd])
+                return self.server_robot.move(command[cmd])
             elif cmd == 'movej':
-                self.server_robot.move(command[cmd], movel=False)
+                return self.server_robot.move(command[cmd], movel=False)
             elif cmd == 'move_ext':
-                self.server_robot.move_ext(command[cmd])
+                return self.server_robot.move_ext(command[cmd])
             elif cmd == 'path_move':
                 if self.server_robot.buffer_len() > 0:
                     self.server_robot.buffer_execute()
@@ -59,59 +59,30 @@ class NdRobotServer():
             elif cmd == 'get_pose':
                 return self.server_robot.get_cartesian()
             elif cmd == 'wait':
-                self.server_robot.wait_time(command[cmd])
+                return self.server_robot.wait_time(command[cmd])
             elif cmd == 'program':
-                self.server_robot.set_group((command[cmd], 0))  # laser program 11
+                return self.server_robot.set_group((command[cmd], 0))  # laser program 11
             elif cmd == 'laser':
-                if command[cmd]:
-                    self.server_robot.set_digital((1, 2))  # laser_main: 1
-                    self.server_robot.set_digital((1, 3))  # laser_standby: 1
-                    self.server_robot.wait_input(1, 0)  # wait_standby: 1
-                    self.server_robot.wait_input(0, 1)  # wait_generalfault: 0
-                else:
-                    self.server_robot.set_digital((0, 3))  # laser_standby: 0
+                return self.server_robot.laser_ready(command[cmd])
             elif cmd == 'power':
-                self.server_robot.set_group((11, 0))  # laser program 11
-                pwr = int((command[cmd] * 65535) / 1500)  # digital value
-                self.server_robot.set_group((pwr, 1))  # laser power
+                return self.server_robot.laser_power(command[cmd])
             elif cmd == 'powder':
-                if command[cmd]:
-                    self.server_robot.set_digital((1, 4))  # weldgas: 1
-                    self.server_robot.set_digital((0, 1))  # gtv_stop
-                    self.server_robot.set_digital((1, 0))  # gtv_start
-                else:
-                    self.server_robot.set_digital((1, 1))  # gtv_stop
-                    self.server_robot.set_digital((0, 0))  # gtv_start
-                    self.server_robot.set_digital((0, 4))  # weldgas: 0
-            elif cmd == 'weldgas':
-                if command[cmd]:
-                    self.server_robot.set_digital((1, 4))  # weldgas: 1
-                else:
-                    self.server_robot.set_digital((0, 4))  # weldgas: 0
-            elif cmd == 'gtv':
-                if command[cmd]:
-                    self.server_robot.set_digital((0, 1))  # gtv_stop
-                    self.server_robot.set_digital((1, 0))  # gtv_start
-                else:
-                    self.server_robot.set_digital((1, 1))  # gtv_stop
-                    self.server_robot.set_digital((0, 0))  # gtv_start
+                return self.server_robot.powder(command[cmd])
             elif cmd == 'carrier':
-                carrier = int((command[cmd] * 100) / 15)  # digital value
-                self.server_robot.set_analog((carrier, 1))  # gtv_massflow
+                return self.server_robot.massflow(command[cmd])
             elif cmd == 'turntable':
-                turntable = int((command[cmd] * 100) / 10)  # digital value
-                self.server_robot.set_analog((turntable, 0))  # gtv_disk
+                return self.server_robot.disk(command[cmd])
             elif cmd == 'stirrer':
                 stirrer = int((command[cmd] * 100) / 100)
-            # elif cmd == 'rootgas':
-            #     self.server_robot.set_digital((command[cmd], 5))
+                return '0 0'
             elif cmd == 'cancel':
-                self.server_robot.cancel_motion()
+                return self.server_robot.cancel_motion()
             elif cmd == 'reset_laser':
-                self.server_robot.reset_laser()
+                return self.server_robot.reset_laser()
             elif cmd == 'reset_powder':
-                self.server_robot.reset_powder()
+                return self.server_robot.reset_powder()
             else:
+                return 'ERR_COMMAND'
                 print 'Unknown command:', cmd
 
 

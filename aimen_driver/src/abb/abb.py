@@ -122,11 +122,14 @@ class Robot:
         Executes a move immediately from the current pose,
         to 'pose', with units of millimeters.
         '''
-        if linear:
-            msg = "01 " + self.format_pose(pose)
-        else:
-            msg = "10 " + self.format_pose(pose)
-        return self.send(msg, response)
+        try:
+            if linear:
+                msg = "01 " + self.format_pose(pose)
+            else:
+                msg = "10 " + self.format_pose(pose)
+            return self.send(msg, response)
+        except NameError as name:
+            return str(name)
 
     def set_cartesian_trigg(self, pose, trigger=False, response=True):
         '''
@@ -134,10 +137,13 @@ class Robot:
         to 'pose', with units of millimeters. And triggers
         a digital output.
         '''
-        msg = "11 " + self.format_pose(pose)
-        msg = msg[:-1]
-        msg += str(int(trigger)) + " #"
-        return self.send(msg, response)
+        try:
+            msg = "11 " + self.format_pose(pose)
+            msg = msg[:-1]
+            msg += str(int(trigger)) + " #"
+            return self.send(msg, response)
+        except NameError as name:
+            return str(name)
 
     def set_joints(self, joints, response=True):
         '''
@@ -199,9 +205,13 @@ class Robot:
         Offsets are from tool0, which is defined at the intersection of the
         tool flange center axis and the flange face.
         '''
-        msg = "06 " + self.format_pose(tool)
-        self.send(msg)
-        self.tool = tool
+        try:
+            msg = "06 " + self.format_pose(tool)
+            resp = self.send(msg)
+            self.tool = tool
+            return resp
+        except NameError as name:
+            return str(name)
 
     def load_json_tool(self, file_obj, filename):
         if file_obj.__class__.__name__ == 'str':
@@ -218,8 +228,11 @@ class Robot:
         The workobject is a local coordinate frame you can define on the robot,
         then subsequent cartesian moves will be in this coordinate frame.
         '''
-        msg = "07 " + self.format_pose(work_obj)
-        self.send(msg)
+        try:
+            msg = "07 " + self.format_pose(work_obj)
+            return self.send(msg)
+        except NameError as name:
+            return str(name)
 
     def set_speed(self, speed=[0, 50, 50, 50]):
         '''
@@ -234,7 +247,7 @@ class Robot:
         msg += format(speed[1], "+08.2f") + " "
         msg += format(speed[2], "+08.1f") + " "
         msg += format(speed[3], "+08.2f") + " #"
-        self.send(msg)
+        return self.send(msg)
 
     def set_zone(self,
                  zone_key='z1',
@@ -282,7 +295,7 @@ class Robot:
         msg += format(zone[0], "+08.4f") + " "
         msg += format(zone[1], "+08.4f") + " "
         msg += format(zone[2], "+08.4f") + " #"
-        self.send(msg)
+        return self.send(msg)
 
     def move_ext_axis(self, axis, rot_position, rot_speed):
         '''
@@ -301,11 +314,14 @@ class Robot:
         Move will execute at current speed (which you can change between
         buffer_add calls)
         '''
-        msg = "30 " + self.format_pose(pose)
-        if trigger:
-            msg = msg[:-1]
-            msg += str(int(trigger_set)) + " #"
-        self.send(msg)
+        try:
+            msg = "30 " + self.format_pose(pose)
+            if trigger:
+                msg = msg[:-1]
+                msg += str(int(trigger_set)) + " #"
+            self.send(msg)
+        except NameError as name:
+            return str(name)
 
     def buffer_set(self, pose_list):
         '''
@@ -360,14 +376,17 @@ class Robot:
         Executes a movement in a circular path from current position,
         through pose_onarc, to pose_end
         '''
-        msg_0 = "35 " + self.format_pose(pose_onarc)
-        msg_1 = "36 " + self.format_pose(pose_end)
+        try:
+            msg_0 = "35 " + self.format_pose(pose_onarc)
+            msg_1 = "36 " + self.format_pose(pose_end)
 
-        data = self.send(msg_0).split()
-        if data[1] != '1':
-            log.warn('move_circular incorrect response, bailing!')
-            return False
-        return self.send(msg_1)
+            data = self.send(msg_0).split()
+            if data[1] != '1':
+                log.warn('move_circular incorrect response, bailing!')
+                return False
+            return self.send(msg_1)
+        except NameError as name:
+            return str(name)
 
     def wait_time(self, value):
         '''
@@ -462,7 +481,7 @@ def check_coordinates(coordinates):
     elif (len(coordinates) == 7):
         return [coordinates[0:3], coordinates[3:7]]
     log.warn('Recieved malformed coordinate: %s', str(coordinates))
-    raise NameError('Malformed coordinate!')
+    raise NameError('COORD_ERROR')
 
 if __name__ == '__main__':
     formatter = logging.Formatter(
