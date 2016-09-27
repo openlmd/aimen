@@ -241,7 +241,7 @@ class Robot:
         '''
 
         if len(speed) != 4:
-            return False
+            return "PARAM_ERROR"
         msg = "08 "
         msg += format(speed[0], "+08.1f") + " "
         msg += format(speed[1], "+08.2f") + " "
@@ -288,7 +288,7 @@ class Robot:
         elif zone_key in zone_dict.keys():
             zone = zone_dict[zone_key]
         else:
-            return False
+            return "PARAM_ERROR"
 
         msg = "09 "
         msg += str(int(point_motion)) + " "
@@ -462,7 +462,7 @@ class Robot:
         return msg
 
     def close(self):
-        self.send("99 #", False)
+        self.send("99 #", True)
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
         log.info('Disconnected from ABB robot.')
@@ -477,11 +477,21 @@ class Robot:
 def check_coordinates(coordinates):
     if ((len(coordinates) == 2) and (len(coordinates[0]) == 3)
        and (len(coordinates[1]) == 4)):
+        check_quaternions(coordinates[1])
         return coordinates
     elif (len(coordinates) == 7):
+        check_quaternions(coordinates[3:7])
         return [coordinates[0:3], coordinates[3:7]]
     log.warn('Recieved malformed coordinate: %s', str(coordinates))
-    raise NameError('COORD_ERROR')
+    raise NameError('PARAM_ERROR')
+
+def check_quaternions(quat):
+    d = 0
+    for w in quat:
+        d = d + w * w
+    if round(d, 3) != 1:
+        print 'Normalize quaternions'
+        raise NameError('PARAM_ERROR')
 
 if __name__ == '__main__':
     formatter = logging.Formatter(
