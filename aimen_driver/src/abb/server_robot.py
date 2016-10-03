@@ -71,6 +71,17 @@ class ServerRobot(Robot):
             print 'Invalid command format'
             return ''
 
+    def force_digital(self, digital):
+        """
+        Dato digital 0 = Valor
+        Dato digital 1 = Numero de salida
+        """
+        if len(digital) == 2:
+            return self.force_dio(digital[0], digital[1])
+        else:
+            print 'Invalid command format'
+            return ''
+
     def set_analog(self, analog):
         """
         Dato analogico 0 = Valor
@@ -81,6 +92,20 @@ class ServerRobot(Robot):
             if analog[0] > 100:
                 analog[0] = 100
             return self.set_ao(analog[0], analog[1])
+        else:
+            print 'Invalid command format'
+            return ''
+
+    def force_analog(self, analog):
+        """
+        Dato analogico 0 = Valor
+        Dato analogico 1 = Numero de salida
+        """
+        if len(analog) == 2:
+            analog = list(analog)
+            if analog[0] > 100:
+                analog[0] = 100
+            return self.force_ao(analog[0], analog[1])
         else:
             print 'Invalid command format'
             return ''
@@ -96,6 +121,21 @@ class ServerRobot(Robot):
                     if digital[0] > 65535:
                         digital[0] = 65535
                 return self.set_gdo(digital[0], digital[1])
+        else:
+            print 'Invalid command format'
+            return ''
+
+    def force_group(self, digital):
+        if len(digital) == 2:
+            if (type(digital[0]) == int) and (type(digital[1]) == int):
+                digital = list(digital)
+                if digital[1] == 0:
+                    if digital[0] > 31:
+                        digital[0] = 31
+                if digital[1] == 1:
+                    if digital[0] > 65535:
+                        digital[0] = 65535
+                return self.force_gdo(digital[0], digital[1])
         else:
             print 'Invalid command format'
             return ''

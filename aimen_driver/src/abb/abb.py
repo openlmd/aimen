@@ -339,6 +339,16 @@ class Robot:
         #return
         return self.send(msg)
 
+    def force_gdo(self, value, id=0):
+        '''
+        A function to force a value to a group of DO on the robot.
+        For this to work you're going to need to edit the RAPID function
+        and fill in the AO you want this to switch.
+        '''
+        msg = '85 ' + str(int(id)) + ' ' + str(int(value)) + ' #'
+        #return
+        return self.send(msg)
+
     def set_gdo(self, value, id=0):
         '''
         A function to set a value to a group of DO on the robot.
@@ -349,6 +359,16 @@ class Robot:
         #return
         return self.send(msg)
 
+    def force_ao(self, value, id=0):
+        '''
+        A function to force a physical AO line on the robot.
+        For this to work you're going to need to edit the RAPID function
+        and fill in the AO you want this to switch.
+        '''
+        msg = '86 ' + str(int(id)) + ' ' + str(float(value)) + ' #'
+        #return
+        return self.send(msg)
+
     def set_ao(self, value, id=0):
         '''
         A function to set a physical AO line on the robot.
@@ -356,6 +376,16 @@ class Robot:
         and fill in the AO you want this to switch.
         '''
         msg = '96 ' + str(int(id)) + ' ' + str(float(value)) + ' #'
+        #return
+        return self.send(msg)
+
+    def force_dio(self, value, id=0):
+        '''
+        A function to force a physical DIO line on the robot.
+        For this to work you're going to need to edit the RAPID function
+        and fill in the DIO you want this to switch.
+        '''
+        msg = '87 ' + str(int(id)) + ' ' + str(int(bool(value))) + ' #'
         #return
         return self.send(msg)
 

@@ -390,6 +390,26 @@ PROC main()
                 ok :=SERVER_BAD_MSG;
               ENDIF
 
+      			CASE 85: !Force to GO
+      				IF nParams = 2 THEN
+                IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+            			TEST params{1}
+            				CASE 0:
+                      SetGO GO_FL_Programa, params{2};
+        						CASE 1:
+                      SetGO GO_FL_PotenciaLaser1, params{2};
+            				DEFAULT:
+                      TPWrite "SERVER: Illegal output code FGO = ", \Num:=params{1};
+                      ok := SERVER_BAD_MSG;
+        					ENDTEST
+                  addString := "BUFFER_OK";
+                ELSE
+                  addString := "BUFFER_FULL";
+                ENDIF
+              ELSE
+                ok :=SERVER_BAD_MSG;
+              ENDIF
+
       			CASE 95: !Value to GO
       				IF nParams = 2 THEN
                 IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
@@ -420,6 +440,26 @@ PROC main()
                 ok :=SERVER_BAD_MSG;
               ENDIF
 
+			      CASE 86: !Force an analog output
+                IF nParams = 2 THEN
+                  IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                    TEST params{1}
+                      CASE 0:
+                        SetAO AoGTV_ExternDisk, params{2};
+                      CASE 1:
+                        SetAO AoGTV_ExternMassflow, params{2};
+          						DEFAULT:
+                      				TPWrite "SERVER: Illegal output code FAO = ", \Num:=params{1};
+                              ok := SERVER_BAD_MSG;
+    					      ENDTEST
+                    addString := "BUFFER_OK";
+                  ELSE
+                    addString := "BUFFER_FULL";
+                  ENDIF
+                ELSE
+                    ok :=SERVER_BAD_MSG;
+                ENDIF
+
 			      CASE 96: !Set an analog output
                 IF nParams = 2 THEN
                   IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
@@ -447,6 +487,58 @@ PROC main()
                 ELSE
                     ok :=SERVER_BAD_MSG;
                 ENDIF
+
+    		    CASE 87: !Set or reset a digital output
+              IF nParams = 2 THEN
+        				IF NOT ((n_cartesian_motion - n_cartesian_command) = 1 OR (n_cartesian_motion - n_cartesian_command) = -48) THEN
+                  TEST params{1}
+        						CASE 0:
+                      IF params{2} <> 0 THEN
+                        SetDO doGTV_StartExtern, 1;
+                      ELSE
+                        SetDO doGTV_StartExtern, 0;
+                      ENDIF
+                    CASE 1:
+                      IF params{2} <> 0 THEN
+                        SetDO doGTV_Stop, 1;
+                      ELSE
+                        SetDO doGTV_Stop, 0;
+                      ENDIF
+                    CASE 2:
+                      IF params{2} <> 0 THEN
+                        SetDO Do_FL_RedENC, 1;
+                      ELSE
+                        SetDO Do_FL_RedENC, 0;
+                      ENDIF
+                    CASE 3:
+                      IF params{2} <> 0 THEN
+                        SetDO Do_FL_StandByEnc, 1;
+                      ELSE
+                        SetDO Do_FL_StandByEnc, 0;
+                      ENDIF
+                    CASE 4:
+                      IF params{2} <> 0 THEN
+                        SetDO DoWeldGas, 1;
+                      ELSE
+                        SetDO DoWeldGas, 0;
+                      ENDIF
+                    CASE 5:
+                      IF params{2} <> 0 THEN
+                        SetDO DoRootGas, 1;
+                      ELSE
+                        SetDO DoRootGas, 0;
+                      ENDIF
+        						DEFAULT:
+                  		TPWrite "SERVER: Illegal output code DO =", \Num:=params{1};
+                  		ok := SERVER_BAD_MSG;
+        					ENDTEST
+                  addString := "BUFFER_OK";
+                ELSE
+                  addString := "BUFFER_FULL";
+                ENDIF
+              ELSE
+                ok :=SERVER_BAD_MSG;
+              ENDIF
 
     		    CASE 97: !Set or reset a digital output
               IF nParams = 2 THEN
