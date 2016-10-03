@@ -103,14 +103,14 @@ class Robot:
         msg = "100 #"
         return self.send(msg, response)
 
-    def reset_laser(self, response=True):
+    def r_laser(self, response=True):
         '''
         Stop and reset laser signals.
         '''
         msg = "101 #"
         return self.send(msg, response)
 
-    def reset_powder(self, response=True):
+    def r_powder(self, response=True):
         '''
         Stop and reset powder feeder signals.
         '''
@@ -144,19 +144,6 @@ class Robot:
             return self.send(msg, response)
         except NameError as name:
             return str(name)
-
-    def set_joints(self, joints, response=True):
-        '''
-        Executes a move immediately, from current joint angles,
-        to 'joints', in degrees.
-        '''
-        if len(joints) != 6:
-            return False
-        msg = "02 "
-        for joint in joints:
-            msg += format(joint*self.scale_angle, "+08.2f") + " "
-        msg += "#"
-        return self.send(msg, response)
 
     def get_cartesian(self):
         '''
@@ -306,60 +293,6 @@ class Robot:
         msg += str(float(rot_position)) + ' '
         msg += str(float(rot_speed)) + ' #'
         #return
-        return self.send(msg)
-
-    def buffer_add(self, pose, trigger=False, trigger_set=False):
-        '''
-        Appends single pose to the remote buffer
-        Move will execute at current speed (which you can change between
-        buffer_add calls)
-        '''
-        try:
-            msg = "30 " + self.format_pose(pose)
-            if trigger:
-                msg = msg[:-1]
-                msg += str(int(trigger_set)) + " #"
-            self.send(msg)
-        except NameError as name:
-            return str(name)
-
-    def buffer_set(self, pose_list):
-        '''
-        Adds every pose in pose_list to the remote buffer
-        '''
-        self.clear_buffer()
-        for pose in pose_list:
-            self.buffer_add(pose)
-        if self.buffer_len() == len(pose_list):
-            log.debug('Successfully added %i poses to remote buffer',
-                      len(pose_list))
-            return True
-        else:
-            log.warn('Failed to add poses to remote buffer!')
-            self.clear_buffer()
-            return False
-
-    def clear_buffer(self):
-        msg = "31 #"
-        data = self.send(msg)
-        if self.buffer_len() != 0:
-            log.warn('clear_buffer failed! buffer_len: %i', self.buffer_len())
-            raise NameError('clear_buffer failed!')
-        return data
-
-    def buffer_len(self):
-        '''
-        Returns the length (number of poses stored) of the remote buffer
-        '''
-        msg = "32 #"
-        data = self.send(msg).split()
-        return int(float(data[2]))
-
-    def buffer_execute(self):
-        '''
-        Immediately execute linear moves to every pose in the remote buffer.
-        '''
-        msg = "33 #"
         return self.send(msg)
 
     def set_external_axis(self, axis_unscaled=[-550, 0, 0, 0, 0, 0]):

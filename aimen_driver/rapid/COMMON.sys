@@ -47,15 +47,6 @@ PERS robtarget circPoint;
 PERS bool frameMutex:=FALSE;
 PERS bool connectMutex := FALSE;
 
-!//Buffered move variables
-CONST num MAX_BUFFER := 100;
-PERS num BUFFER_POS := 6;
-PERS robtarget bufferTargets{MAX_BUFFER};
-PERS speeddata bufferSpeeds{MAX_BUFFER};
-PERS zonedata bufferZones{MAX_BUFFER};
-PERS bool bufferTriggSet{MAX_BUFFER};
-PERS bool bufferTrigg{MAX_BUFFER};
-
 
 PERS bool trajectory_lock := FALSE;
 PERS bool new_trajectory := FALSE;

@@ -43,23 +43,16 @@ class NdRobotServer():
                 return self.server_robot.workobject(command[cmd])
             elif cmd == 'speed':
                 return self.server_robot.speed(command[cmd])
-            elif cmd == 'pose':
-                return self.server_robot.buffer_pose(command[cmd])
             elif cmd == 'move':
                 return self.server_robot.move(command[cmd])
             elif cmd == 'movej':
                 return self.server_robot.move(command[cmd], movel=False)
             elif cmd == 'move_ext':
                 return self.server_robot.move_ext(command[cmd])
-            elif cmd == 'path_move':
-                if self.server_robot.buffer_len() > 0:
-                    self.server_robot.buffer_execute()
-            elif cmd == 'path_clear':
-                self.server_robot.clear_buffer()
             elif cmd == 'get_pose':
-                return self.server_robot.get_cartesian()
+                return self.server_robot.get_pose()
             elif cmd == 'wait':
-                return self.server_robot.wait_time(command[cmd])
+                return self.server_robot.wait(command[cmd])
             elif cmd == 'program':
                 return self.server_robot.set_group((command[cmd], 0))  # laser program 11
             elif cmd == 'laser':
@@ -69,14 +62,14 @@ class NdRobotServer():
             elif cmd == 'powder':
                 return self.server_robot.powder(command[cmd])
             elif cmd == 'carrier':
-                return self.server_robot.massflow(command[cmd])
+                return self.server_robot.carrier(command[cmd])
             elif cmd == 'turntable':
-                return self.server_robot.disk(command[cmd])
+                return self.server_robot.turntable(command[cmd])
             elif cmd == 'stirrer':
                 stirrer = int((command[cmd] * 100) / 100)
                 return '0 0'
             elif cmd == 'cancel':
-                return self.server_robot.cancel_motion()
+                return self.server_robot.cancel()
             elif cmd == 'reset_laser':
                 return self.server_robot.reset_laser()
             elif cmd == 'reset_powder':

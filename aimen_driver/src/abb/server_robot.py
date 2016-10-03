@@ -17,13 +17,11 @@ class ServerRobot(Robot):
     def disconnect(self):
         self.close()
 
+    def tool(self, tool_obj):
+        return self.set_tool(tool_obj)
+
     def workobject(self, work_obj):
-        if len(work_obj) == 2:
-            if (len(work_obj[0]) == 3) and (len(work_obj[1]) == 4):
-                return self.set_workobject(work_obj)
-        else:
-            print 'Invalid command format'
-            return ''
+        return self.set_workobject(work_obj)
 
     def configure(self, filename):
         print filename
@@ -55,6 +53,12 @@ class ServerRobot(Robot):
         else:
             print 'Invalid command format'
             return ''
+
+    def get_pose(self):
+        return self.get_cartesian()
+
+    def wait(self, time):
+        return self.wait_time(time)
 
     def set_digital(self, digital):
         """
@@ -95,14 +99,6 @@ class ServerRobot(Robot):
         else:
             print 'Invalid command format'
             return ''
-
-    def buffer_pose(self, pose):
-        if len(pose) == 2:
-            self.buffer_add(pose)
-        elif len(pose) == 3:
-            self.buffer_add(pose[:2], True, pose[2])
-        else:
-            print 'Invalid command format'
 
     def laser_ready(self, ready):
         if ready:
@@ -175,13 +171,23 @@ class ServerRobot(Robot):
                     self.instructionCount += 0
                 return r
 
-    def massflow(self, carrierflow):
+    def carrier(self, carrierflow):
         carrier = int((carrierflow * 100) / 15)  # digital value
         return self.set_analog((carrier, 1))  # gtv_massflow
 
-    def disk(self, turntablespeed):
+    def turntable(self, turntablespeed):
         turntable = int((turntablespeed * 100) / 10)  # digital value
         return self.set_analog((turntable, 0))  # gtv_disk
+
+    def cancel(self):
+        return self.cancel_motion()
+
+    def reset_laser(self):
+        return self.r_laser()
+
+    def reset_powder(self):
+        return self.r_powder()
+
 
 if __name__ == '__main__':
     server_robot = ServerRobot()
