@@ -102,6 +102,12 @@ PROC FullReset ()
     SetDO doGTV_StartExtern, 0;
     SetDO DoWeldGas, 0;
     SetDO doGTV_Stop, 1;
+    ERROR (LONG_JMP_ALL_ERR)
+        TEST ERRNO
+            CASE ERR_NORUNUNIT:
+                TPWrite "SERVER: No contact with unit.";
+                TRYNEXT;
+        ENDTEST
 ENDPROC
 
 PROC Reconnect ()
@@ -668,9 +674,9 @@ PROC main()
 ERROR (LONG_JMP_ALL_ERR)
     TPWrite "SERVER: ------";
     TPWrite "SERVER: Error Handler:" + NumtoStr(ERRNO,0);
-    FullReset;
     TEST ERRNO
         CASE ERR_SOCK_CLOSED:
+            FullReset;
             TPWrite "SERVER: Lost connection to the client.";
             TPWrite "SERVER: Closing socket and restarting.";
             TPWrite "SERVER: ------";
@@ -680,6 +686,7 @@ ERROR (LONG_JMP_ALL_ERR)
             TPWrite "SERVER: No contact with unit.";
             TRYNEXT;
         DEFAULT:
+            FullReset;
             TPWrite "SERVER: Unknown error.";
             TPWrite "SERVER: Closing socket and restarting.";
             TPWrite "SERVER: ------";

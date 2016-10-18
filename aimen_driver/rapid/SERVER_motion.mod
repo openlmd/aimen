@@ -167,8 +167,14 @@ PROC main()
         WaitTime 0.1;  ! Throttle loop while waiting for new command
     ENDWHILE
 ERROR
-    ErrWrite \W, "Motion Error", "Error executing motion.  Aborting trajectory.";
-    abort_trajectory;
+	TEST ERRNO
+			CASE ERR_NORUNUNIT:
+					TPWrite "MOTION: No contact with unit.";
+					TRYNEXT;
+			DEFAULT:
+					ErrWrite \W, "Motion Error", "Error executing motion.  Aborting trajectory.";
+					abort_trajectory;
+	ENDTEST
 ENDPROC
 
 LOCAL PROC abort_trajectory()
@@ -193,6 +199,15 @@ LOCAL TRAP new_cancel_motion_handler
 	SetDO Do_FL_RedENC, 0;
 	SetDO Do_FL_StandByEnc, 0;
 	abort_trajectory;
+	ERROR
+		TEST ERRNO
+				CASE ERR_NORUNUNIT:
+						TPWrite "MOTION: No contact with unit.";
+						TRYNEXT;
+				DEFAULT:
+						ErrWrite \W, "Motion Error", "Error executing motion.  Aborting trajectory.";
+						abort_trajectory;
+		ENDTEST
 ENDTRAP
 
 ENDMODULE
