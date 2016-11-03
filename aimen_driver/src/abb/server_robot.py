@@ -190,7 +190,7 @@ class ServerRobot(Robot):
             if self.instructionCount == 2:
                 r = self.set_digital((1, 0))  # gtv_start
                 if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount += 0
+                    self.instructionCount = 0
                 return r
         else:
             if self.instructionCount == 0:
@@ -208,7 +208,7 @@ class ServerRobot(Robot):
             if self.instructionCount == 2:
                 r = self.set_digital((0, 4))  # weldgas: 0
                 if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount += 0
+                    self.instructionCount = 0
                 return r
 
     def carrier(self, carrierflow):
