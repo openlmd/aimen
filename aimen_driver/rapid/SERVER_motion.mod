@@ -100,6 +100,34 @@ PROC main()
 								WaitDI Di_FL_ErrorLaserApagado, 0;
 							ENDIF
 
+						CASE 932: !WaitDI
+							IF commandSetDO{n_cartesian_motion} THEN
+								WaitDI TdiExtActiv, 1;
+							ELSE
+								WaitDI TdiExtActiv, 0;
+							ENDIF
+
+						CASE 933: !WaitDI
+							IF commandSetDO{n_cartesian_motion} THEN
+								WaitDI TdiLaserOn, 1;
+							ELSE
+								WaitDI TdiLaserOn, 0;
+							ENDIF
+
+						CASE 934: !WaitDI
+							IF commandSetDO{n_cartesian_motion} THEN
+								WaitDI TdiLaserAsig, 1;
+							ELSE
+								WaitDI TdiLaserAsig, 0;
+							ENDIF
+
+						CASE 935: !WaitDI
+							IF commandSetDO{n_cartesian_motion} THEN
+								WaitDI TdiLaserReady, 1;
+							ELSE
+								WaitDI TdiLaserReady, 0;
+							ENDIF
+
 						CASE 94: !Wait time
 							WaitTime numBufferAux{n_cartesian_motion};
 
@@ -108,6 +136,12 @@ PROC main()
 
 						CASE 951: !
 							SetGO GO_FL_PotenciaLaser1, numBufferAux{n_cartesian_motion};
+
+						CASE 952: !
+							SetGO GoTPSJobL, numBufferAux{n_cartesian_motion};
+
+						CASE 953: !
+							SetGO TGOPROGRAM_No, numBufferAux{n_cartesian_motion};
 
 						CASE 960: !
 							SetAO AoGTV_ExternDisk, numBufferAux{n_cartesian_motion};
@@ -157,6 +191,97 @@ PROC main()
 								SetDO DoRootGas, 0;
 							ENDIF
 
+						CASE 976: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO DoCossJet, 1;
+							ELSE
+								SetDO DoCossJet, 0;
+							ENDIF
+
+						CASE 977: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSReset, 1;
+							ELSE
+								SetDO doTPSReset, 0;
+							ENDIF
+
+						CASE 978: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSReady, 1;
+							ELSE
+								SetDO doTPSReady, 0;
+							ENDIF
+
+						CASE 979: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSOP0, 1;
+							ELSE
+								SetDO doTPSOP0, 0;
+							ENDIF
+
+						CASE 9710: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSOP1, 1;
+							ELSE
+								SetDO doTPSOP1, 0;
+							ENDIF
+
+						CASE 9711: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSOP2, 1;
+							ELSE
+								SetDO doTPSOP2, 0;
+							ENDIF
+
+						CASE 9712: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSWireF, 1;
+							ELSE
+								SetDO doTPSWireF, 0;
+							ENDIF
+
+						CASE 9713: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSWeld, 1;
+							ELSE
+								SetDO doTPSWeld, 0;
+							ENDIF
+
+						CASE 9714: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoLaserOn, 1;
+							ELSE
+								SetDO TdoLaserOn, 0;
+							ENDIF
+
+						CASE 9715: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoExtActiv, 1;
+							ELSE
+								SetDO TdoExtActiv, 0;
+							ENDIF
+
+						CASE 9716: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoStandBy, 1;
+							ELSE
+								SetDO TdoStandBy, 0;
+							ENDIF
+
+						CASE 9717: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoActLaser, 1;
+							ELSE
+								SetDO TdoActLaser, 0;
+							ENDIF
+
+						CASE 9718: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoPStartStat, 1;
+							ELSE
+								SetDO TdoPStartStat, 0;
+							ENDIF
+
             DEFAULT:
 				TPWrite "SERVER_motion: Illegal instruction code: ", \Num:=command_type{n_cartesian_motion};
           ENDTEST
@@ -194,8 +319,11 @@ LOCAL TRAP new_cancel_motion_handler
 	cancel_motion := FALSE;
 	n_cartesian_motion := n_cartesian_command;
 	SetDO Do_FL_RayoLaserEnc, 0;
+	SetDO TdoPStartStat, 0;
 	SetDO doGTV_StartExtern, 0;
 	SetDO doGTV_Stop, 0;
+	SetDO doTPSWireF, 0;
+	SetDO doTPSWeld, 0;
 	SetDO Do_FL_RedENC, 0;
 	SetDO Do_FL_StandByEnc, 0;
 	abort_trajectory;

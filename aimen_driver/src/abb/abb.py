@@ -117,6 +117,13 @@ class Robot:
         msg = "102 #"
         return self.send(msg, response)
 
+    def r_wire(self, response=True):
+        '''
+        Stop and reset powder feeder signals.
+        '''
+        msg = "103 #"
+        return self.send(msg, response)
+
     def set_cartesian(self, pose, linear=True, response=True):
         '''
         Executes a move immediately from the current pose,

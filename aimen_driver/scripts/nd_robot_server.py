@@ -59,6 +59,8 @@ class NdRobotServer():
                 return self.server_robot.laser_ready(command[cmd])
             elif cmd == 'power':
                 return self.server_robot.laser_power(command[cmd])
+            elif cmd == 'wire':
+                return self.server_robot.wire_set(command[cmd])
             elif cmd == 'powder':
                 return self.server_robot.powder(command[cmd])
             elif cmd == 'carrier':
@@ -74,6 +76,8 @@ class NdRobotServer():
                 return self.server_robot.reset_laser()
             elif cmd == 'reset_powder':
                 return self.server_robot.reset_powder()
+            elif cmd == 'reset_wire':
+                return self.server_robot.reset_wire()
             else:
                 return 'ERR_COMMAND'
                 print 'Unknown command:', cmd

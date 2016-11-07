@@ -140,7 +140,7 @@ class ServerRobot(Robot):
             print 'Invalid command format'
             return ''
 
-    def laser_ready(self, ready):
+    def laser_ready_fl015(self, ready):
         if ready:
             if self.instructionCount == 0:
                 r = self.set_digital((1, 2))  # laser_main: 1
@@ -168,10 +168,180 @@ class ServerRobot(Robot):
         else:
             return self.set_digital((0, 3))  # laser_standby: 0
 
+    def laser_ready_trudisk(self, ready):
+        if ready:
+            if self.instructionCount == 0:
+                r = self.set_digital((1, 15))  # TdoExtActiv: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 1:
+                r = self.wait_input(1, 2)  # TdiExtActiv: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 2:
+                r = self.set_digital((1, 14))  # TdoLaserOn: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 3:
+                r = self.wait_input(1, 3)  # TdiLaserOn: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 4:
+                r = self.set_digital((1, 16))  # TdoStandBy: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 5:
+                r = self.set_digital((1, 17))  # TdoActLaser: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 6:
+                r = self.wait_input(1, 4)  # TdiLaserAsig: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 7:
+                r = self.set_group((28, 3))  # TGOPROGRAM_No: 100
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 8:
+                r = self.wait_input(1, 5)  # TdiLaserReady: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 9:
+                r = self.set_digital((1, 6))  # DoCossJet: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 10:
+                r = self.set_digital((1, 5))  # DoRootGas: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount = 0
+                return r
+        else:
+            if self.instructionCount == 0:
+                r = self.set_digital((0, 17))  # TdoActLaser: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 1:
+                r = self.set_digital((0, 16))  # TdoStandBy: 0
+                if r.split()[2] == 'BUFFELSEER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 2:
+                r = self.set_digital((0, 14))  # TdoLaserOn: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 3:
+                r = self.set_digital((0, 15))  # TdoExtActiv: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 4:
+                r = self.set_digital((0, 6))  # DoCossJet: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 5:
+                r = self.set_digital((0, 5))  # DoRootGas: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount = 0
+                return r
+
+    def laser_ready(self, ready):
+        return self.laser_ready_trudisk(ready)
+
     def laser_power(self, power):
         self.set_group((11, 0))  # laser program 11
         pwr = int((power * 65535) / 1500)  # digital value
         return self.set_group((pwr, 1))  # laser power
+
+    def wire_set(self, state):
+        #TODO:
+        if state:
+            if self.instructionCount == 0:
+                r = self.set_digital((1, 7))  # doTPSReset: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 1:
+                r = self.wait_time(0.5)
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 2:
+                r = self.set_digital((0, 7))  # doTPSReset: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 3:
+                r = self.set_digital((1, 8))  # doTPSReady: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 4:
+                r = self.set_digital((1, 9))  # doTPSOP0: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 5:
+                r = self.set_digital((0, 10))  # doTPSOP1: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 6:
+                r = self.set_digital((1, 11))  # doTPSOP2: 1
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 7:
+                r = self.set_group((100, 2))  # GoTPSJobL: 100
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount = 0
+                return r
+        else:
+            if self.instructionCount == 0:
+                r = self.set_digital((0, 12))  # doTPSWireF: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount += 1
+                else:
+                    return r
+            if self.instructionCount == 1:
+                r = self.set_digital((0, 13))  # doTPSWeld: 0
+                if r.split()[2] == 'BUFFER_OK':
+                    self.instructionCount = 0
+                return r
 
     def powder(self, state):
         if state:
@@ -227,6 +397,9 @@ class ServerRobot(Robot):
 
     def reset_powder(self):
         return self.r_powder()
+
+    def reset_wire(self):
+        return self.r_wire()
 
 
 if __name__ == '__main__':

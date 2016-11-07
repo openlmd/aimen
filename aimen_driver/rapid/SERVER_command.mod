@@ -98,10 +98,15 @@ PROC FullReset ()
     n_cartesian_command := n_cartesian_motion;
     cancel_motion := TRUE;
     SetDO Do_FL_RayoLaserEnc, 0;
+    SetDO TdoPStartStat, 0;
     SetDO Do_FL_StandByEnc, 0;
     SetDO doGTV_StartExtern, 0;
     SetDO DoWeldGas, 0;
+    SetDO DoRootGas, 0;
+    SetDO DoCossJet, 0;
     SetDO doGTV_Stop, 1;
+    SetDO doTPSWireF, 0;
+    SetDO doTPSWeld, 0;
     ERROR (LONG_JMP_ALL_ERR)
         TEST ERRNO
             CASE ERR_NORUNUNIT:
@@ -368,6 +373,30 @@ PROC main()
                       n_cartesian_command := n_cartesian_command + 1;
                       IF n_cartesian_command > 49
                         n_cartesian_command := 1;
+                    CASE 2:
+                      command_type{n_cartesian_command} := 932;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 3:
+                      command_type{n_cartesian_command} := 933;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 4:
+                      command_type{n_cartesian_command} := 934;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 5:
+                      command_type{n_cartesian_command} := 935;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
                     DEFAULT:
                       TPWrite "SERVER: Illegal wait code DI =", \Num:=params{1};
                       ok := SERVER_BAD_MSG;
@@ -404,6 +433,10 @@ PROC main()
                       SetGO GO_FL_Programa, params{2};
         						CASE 1:
                       SetGO GO_FL_PotenciaLaser1, params{2};
+                    CASE 2:
+                      SetGO GoTPSJobL, params{2};
+                    CASE 3:
+                      SetGO TGOPROGRAM_No, params{2};
             				DEFAULT:
                       TPWrite "SERVER: Illegal output code FGO = ", \Num:=params{1};
                       ok := SERVER_BAD_MSG;
@@ -430,6 +463,18 @@ PROC main()
                         n_cartesian_command := 1;
         						CASE 1:
               				command_type{n_cartesian_command} := 951;
+                      numBufferAux{n_cartesian_command} := params{2};
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 2:
+              				command_type{n_cartesian_command} := 952;
+                      numBufferAux{n_cartesian_command} := params{2};
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 3:
+              				command_type{n_cartesian_command} := 953;
                       numBufferAux{n_cartesian_command} := params{2};
                       n_cartesian_command := n_cartesian_command + 1;
                       IF n_cartesian_command > 49
@@ -534,6 +579,84 @@ PROC main()
                       ELSE
                         SetDO DoRootGas, 0;
                       ENDIF
+                    CASE 6:
+                      IF params{2} <> 0 THEN
+                        SetDO DoCossJet, 1;
+                      ELSE
+                        SetDO DoCossJet, 0;
+                      ENDIF
+                    CASE 7:
+                      IF params{2} <> 0 THEN
+                        SetDO doTPSReset, 1;
+                      ELSE
+                        SetDO doTPSReset, 0;
+                      ENDIF
+                    CASE 8:
+                      IF params{2} <> 0 THEN
+                        SetDO doTPSReady, 1;
+                      ELSE
+                        SetDO doTPSReady, 0;
+                      ENDIF
+                    CASE 9:
+                      IF params{2} <> 0 THEN
+                        SetDO doTPSOP0, 1;
+                      ELSE
+                        SetDO doTPSOP0, 0;
+                      ENDIF
+                    CASE 10:
+                      IF params{2} <> 0 THEN
+                        SetDO doTPSOP1, 1;
+                      ELSE
+                        SetDO doTPSOP1, 0;
+                      ENDIF
+                    CASE 11:
+                      IF params{2} <> 0 THEN
+                        SetDO doTPSOP2, 1;
+                      ELSE
+                        SetDO doTPSOP2, 0;
+                      ENDIF
+                    CASE 12:
+                      IF params{2} <> 0 THEN
+                        SetDO doTPSWireF, 1;
+                      ELSE
+                        SetDO doTPSWireF, 0;
+                      ENDIF
+                    CASE 13:
+                      IF params{2} <> 0 THEN
+                        SetDO doTPSWeld, 1;
+                      ELSE
+                        SetDO doTPSWeld, 0;
+                      ENDIF
+                    CASE 14:
+                      IF params{2} <> 0 THEN
+                        SetDO TdoLaserOn, 1;
+                      ELSE
+                        SetDO TdoLaserOn, 0;
+                      ENDIF
+                    CASE 15:
+                      IF params{2} <> 0 THEN
+                        SetDO TdoExtActiv, 1;
+                      ELSE
+                        SetDO TdoExtActiv, 0;
+                      ENDIF
+                    CASE 16:
+                      IF params{2} <> 0 THEN
+                        SetDO TdoStandBy, 1;
+                      ELSE
+                        SetDO TdoStandBy, 0;
+                      ENDIF
+                    CASE 17:
+                      IF params{2} <> 0 THEN
+                        SetDO TdoActLaser, 1;
+                      ELSE
+                        SetDO TdoActLaser, 0;
+                      ENDIF
+                    CASE 18:
+                      IF params{2} <> 0 THEN
+                        SetDO TdoPStartStat, 1;
+                      ELSE
+                        SetDO TdoPStartStat, 0;
+                      ENDIF
         						DEFAULT:
                   		TPWrite "SERVER: Illegal output code DO =", \Num:=params{1};
                   		ok := SERVER_BAD_MSG;
@@ -582,6 +705,84 @@ PROC main()
                         n_cartesian_command := 1;
                     CASE 5:
                       command_type{n_cartesian_command} := 975;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 6:
+                      command_type{n_cartesian_command} := 976;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 7:
+                      command_type{n_cartesian_command} := 977;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 8:
+                      command_type{n_cartesian_command} := 978;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 9:
+                      command_type{n_cartesian_command} := 979;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 10:
+                      command_type{n_cartesian_command} := 9710;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 11:
+                      command_type{n_cartesian_command} := 9711;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 12:
+                      command_type{n_cartesian_command} := 9712;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 13:
+                      command_type{n_cartesian_command} := 9713;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 14:
+                      command_type{n_cartesian_command} := 9714;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 15:
+                      command_type{n_cartesian_command} := 9715;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 16:
+                      command_type{n_cartesian_command} := 9716;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 17:
+                      command_type{n_cartesian_command} := 9717;
+                      commandSetDO{n_cartesian_command} := params{2} <> 0;
+                      n_cartesian_command := n_cartesian_command + 1;
+                      IF n_cartesian_command > 49
+                        n_cartesian_command := 1;
+                    CASE 18:
+                      command_type{n_cartesian_command} := 9718;
                       commandSetDO{n_cartesian_command} := params{2} <> 0;
                       n_cartesian_command := n_cartesian_command + 1;
                       IF n_cartesian_command > 49
@@ -638,8 +839,11 @@ PROC main()
                       ENDIF
             CASE 101: !RESET laser
               IF nParams = 0 THEN
+                SetDO TdoPStartStat, 0;
                 SetDO Do_FL_RayoLaserEnc, 0;
                 SetDO Do_FL_StandByEnc, 0;
+                SetDO DoCossJet, 0;
+                SetDO DoRootGas, 0;
                 ok := SERVER_OK;
               ELSE
                 ok := SERVER_BAD_MSG;
@@ -649,6 +853,14 @@ PROC main()
                 SetDO doGTV_StartExtern, 0;
                 SetDO DoWeldGas, 0;
                 SetDO doGTV_Stop, 1;
+                ok := SERVER_OK;
+              ELSE
+                ok := SERVER_BAD_MSG;
+              ENDIF
+            CASE 103: !RESET wire feeder
+              IF nParams = 0 THEN
+                SetDO doTPSWireF, 0;
+                SetDO doTPSWeld, 0;
                 ok := SERVER_OK;
               ELSE
                 ok := SERVER_BAD_MSG;
