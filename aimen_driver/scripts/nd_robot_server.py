@@ -16,8 +16,10 @@ class NdRobotServer():
             'robot_send_command', SrvRobotCommand, self.cb_robot_command)
 
         robot_ip = rospy.get_param('~robot_ip', '192.168.30.4')
+        laser_type = rospy.get_param('~laser_type', 'rofin')
         self.server_robot = ServerRobot()
         self.server_robot.connect(robot_ip)
+        print self.server_robot.set_laser_type(laser_type)
 
         rospy.on_shutdown(self.server_robot.disconnect)
         rospy.spin()

@@ -93,13 +93,11 @@ PROC main()
 			WaitTime loggerWaitTime;
 	ENDWHILE
 ERROR (LONG_JMP_ALL_ERR)
-	TPWrite "LOGGER: ------";
   TPWrite "LOGGER: Error Handler:" + NumtoStr(ERRNO,0);
 	TEST ERRNO
 		CASE ERR_SOCK_CLOSED:
 			TPWrite "LOGGER: Client has closed connection.";
 			TPWrite "LOGGER: Closing socket and restarting.";
-			TPWrite "LOGGER: ------";
 			Reconnect;
 			TRYNEXT;
 		CASE ERR_NORUNUNIT:

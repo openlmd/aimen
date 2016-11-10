@@ -124,6 +124,15 @@ class Robot:
         msg = "103 #"
         return self.send(msg, response)
 
+    def configure_laser(self, laser_type, response=True):
+        '''
+        Configure robor triggers for laser and wire feeder if needed
+        0: Rofin + powder
+        1: Tumpf + wire
+        '''
+        msg = "110 " + str(int(laser_type)) + " #"
+        return self.send(msg, response)
+
     def set_cartesian(self, pose, linear=True, response=True):
         '''
         Executes a move immediately from the current pose,

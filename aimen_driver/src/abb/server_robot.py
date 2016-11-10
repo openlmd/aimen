@@ -5,6 +5,7 @@ class ServerRobot(Robot):
     def __init__(self):
         Robot.__init__(self)
         self.instructionCount = 0
+        self.laser = 'rofin'
 
     def connect(self, ip):
         self.connect_motion((ip, 5000))
@@ -13,6 +14,13 @@ class ServerRobot(Robot):
         self.set_workobject()
         self.set_speed()
         self.set_zone()
+
+    def set_laser_type(self, laser_type):
+        self.laser = laser_type.lower()
+        if self.laser == 'rofin':
+            return self.configure_laser(0)
+        else:
+            return self.configure_laser(1)
 
     def disconnect(self):
         self.close()
@@ -244,7 +252,7 @@ class ServerRobot(Robot):
                     return r
             if self.instructionCount == 1:
                 r = self.set_digital((0, 16))  # TdoStandBy: 0
-                if r.split()[2] == 'BUFFELSEER_OK':
+                if r.split()[2] == 'BUFFER_OK':
                     self.instructionCount += 1
                 else:
                     return r
@@ -273,12 +281,16 @@ class ServerRobot(Robot):
                 return r
 
     def laser_ready(self, ready):
-        return self.laser_ready_trudisk(ready)
+        if self.laser == 'rofin':
+            return self.laser_ready_fl015(ready)
+        else:
+            return self.laser_ready_trudisk(ready)
 
     def laser_power(self, power):
-        self.set_group((11, 0))  # laser program 11
-        pwr = int((power * 65535) / 1500)  # digital value
-        return self.set_group((pwr, 1))  # laser power
+        if self.laser == 'rofin':
+            self.set_group((11, 0))  # laser program 11
+            pwr = int((power * 65535) / 1500)  # digital value
+            return self.set_group((pwr, 1))  # laser power
 
     def wire_set(self, state):
         #TODO:
@@ -331,17 +343,8 @@ class ServerRobot(Robot):
                     self.instructionCount = 0
                 return r
         else:
-            if self.instructionCount == 0:
-                r = self.set_digital((0, 12))  # doTPSWireF: 0
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount += 1
-                else:
-                    return r
-            if self.instructionCount == 1:
-                r = self.set_digital((0, 13))  # doTPSWeld: 0
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount = 0
-                return r
+            r = self.set_digital((0, 8))  # doTPSReady: 0
+            return r
 
     def powder(self, state):
         if state:
@@ -382,12 +385,14 @@ class ServerRobot(Robot):
                 return r
 
     def carrier(self, carrierflow):
-        carrier = int((carrierflow * 100) / 15)  # digital value
-        return self.set_analog((carrier, 1))  # gtv_massflow
+        if self.laser == 'rofin':
+            carrier = int((carrierflow * 100) / 15)  # digital value
+            return self.set_analog((carrier, 1))  # gtv_massflow
 
     def turntable(self, turntablespeed):
-        turntable = int((turntablespeed * 100) / 10)  # digital value
-        return self.set_analog((turntable, 0))  # gtv_disk
+        if self.laser == 'rofin':
+            turntable = int((turntablespeed * 100) / 10)  # digital value
+            return self.set_analog((turntable, 0))  # gtv_disk
 
     def cancel(self):
         return self.cancel_motion()
@@ -396,10 +401,12 @@ class ServerRobot(Robot):
         return self.r_laser()
 
     def reset_powder(self):
-        return self.r_powder()
+        if self.laser == 'rofin':
+            return self.r_powder()
 
     def reset_wire(self):
-        return self.r_wire()
+        if self.laser == 'trumpf':
+            return self.r_wire()
 
 
 if __name__ == '__main__':

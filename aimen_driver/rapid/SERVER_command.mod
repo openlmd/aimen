@@ -110,7 +110,6 @@ PROC FullReset ()
     ERROR (LONG_JMP_ALL_ERR)
         TEST ERRNO
             CASE ERR_NORUNUNIT:
-                TPWrite "SERVER: No contact with unit.";
                 TRYNEXT;
         ENDTEST
 ENDPROC
@@ -861,9 +860,16 @@ PROC main()
               IF nParams = 0 THEN
                 SetDO doTPSWireF, 0;
                 SetDO doTPSWeld, 0;
+                SetDO doTPSReady, 0;
                 ok := SERVER_OK;
               ELSE
                 ok := SERVER_BAD_MSG;
+              ENDIF
+            CASE 110: !Configure laser
+              IF nParams = 1 THEN
+                laser_conf := params{1};
+              ELSE
+                ok :=SERVER_BAD_MSG;
               ENDIF
                   DEFAULT:
                       TPWrite "SERVER: Illegal instruction code";
@@ -884,24 +890,20 @@ PROC main()
     ENDWHILE
 
 ERROR (LONG_JMP_ALL_ERR)
-    TPWrite "SERVER: ------";
-    TPWrite "SERVER: Error Handler:" + NumtoStr(ERRNO,0);
     TEST ERRNO
         CASE ERR_SOCK_CLOSED:
+            TPWrite "SERVER: Error Handler:" + NumtoStr(ERRNO,0);
             FullReset;
             TPWrite "SERVER: Lost connection to the client.";
-            TPWrite "SERVER: Closing socket and restarting.";
-            TPWrite "SERVER: ------";
             Reconnect;
             TRYNEXT;
         CASE ERR_NORUNUNIT:
-            TPWrite "SERVER: No contact with unit.";
+            !TPWrite "SERVER: No contact with unit.";
             TRYNEXT;
         DEFAULT:
+            TPWrite "SERVER: Error Handler:" + NumtoStr(ERRNO,0);
             FullReset;
             TPWrite "SERVER: Unknown error.";
-            TPWrite "SERVER: Closing socket and restarting.";
-            TPWrite "SERVER: ------";
             Reconnect;
             TRYNEXT;
     ENDTEST
