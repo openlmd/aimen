@@ -12,8 +12,6 @@ VAR triggdata laserON;
 VAR triggdata laserOFF;
 VAR triggdata wireON_tps;
 VAR triggdata wireOFF_tps;
-VAR triggdata weldON_tps;
-VAR triggdata weldOFF_tps;
 
 PROC Initialize()
 	IF laser_conf = 0 THEN
@@ -34,8 +32,6 @@ PROC SetRofin()
 		TriggIO laserOFF, 0\DOp:=Do_FL_RayoLaserEnc, 0; !TdoPStartStat
 		TriggIO wireON_tps, 0\DOp:=Do_FL_RayoLaserEnc, 1; !doTPSWireF
 		TriggIO wireOFF_tps, 0\DOp:=Do_FL_RayoLaserEnc, 0; !doTPSWireF
-		TriggIO weldON_tps, 0\DOp:=Do_FL_RayoLaserEnc, 1; !doTPSWeld
-		TriggIO weldOFF_tps, 0\DOp:=Do_FL_RayoLaserEnc, 0; !doTPSWeld
 ENDPROC
 
 PROC SetTrumpf()
@@ -43,8 +39,6 @@ PROC SetTrumpf()
 		TriggIO laserOFF, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
 		TriggIO wireON_tps, 0\DOp:=doTPSWireF, 1; !doTPSWireF
 		TriggIO wireOFF_tps, 0\DOp:=doTPSWireF, 0; !doTPSWireF
-		TriggIO weldON_tps, 0\DOp:=doTPSWeld, 1; !doTPSWeld
-		TriggIO weldOFF_tps, 0\DOp:=doTPSWeld, 0; !doTPSWeld
 ENDPROC
 
 PROC main()
@@ -106,13 +100,13 @@ PROC main()
             CASE 110: !Trigger linear OFF
               moveCompleted := FALSE;
               cartesianTarget{n_cartesian_motion}.extax := pAct.extax;
-              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserOFF \T2:=wireOFF_tps \T3:=weldOFF_tps, currentZone, currentTool \WObj:=currentWobj ;
+              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserOFF \T2:=wireOFF_tps, currentZone, currentTool \WObj:=currentWobj ;
 							moveCompleted := TRUE;
 
             CASE 111: !Trigger linear ON
               moveCompleted := FALSE;
               cartesianTarget{n_cartesian_motion}.extax := pAct.extax;
-              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserON \T2:=wireON_tps \T3:=weldON_tps, currentZone, currentTool \WObj:=currentWobj ;
+              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserON \T2:=wireON_tps, currentZone, currentTool \WObj:=currentWobj ;
 							moveCompleted := TRUE;
 
 						CASE 930: !WaitDI
@@ -352,7 +346,6 @@ LOCAL TRAP new_cancel_motion_handler
 	SetDO doGTV_StartExtern, 0;
 	SetDO doGTV_Stop, 0;
 	SetDO doTPSWireF, 0;
-	SetDO doTPSWeld, 0;
 	SetDO Do_FL_RedENC, 0;
 	SetDO Do_FL_StandByEnc, 0;
 	SetDO TdoExtActiv, 0;

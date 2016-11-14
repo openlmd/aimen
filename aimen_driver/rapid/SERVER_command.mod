@@ -859,7 +859,6 @@ PROC main()
             CASE 103: !RESET wire feeder
               IF nParams = 0 THEN
                 SetDO doTPSWireF, 0;
-                SetDO doTPSWeld, 0;
                 SetDO doTPSReady, 0;
                 ok := SERVER_OK;
               ELSE
