@@ -103,16 +103,49 @@ class Robot:
         msg = "100 #"
         return self.send(msg, response)
 
+    def r_laser(self, response=True):
+        '''
+        Stop and reset laser signals.
+        '''
+        msg = "101 #"
+        return self.send(msg, response)
+
+    def r_powder(self, response=True):
+        '''
+        Stop and reset powder feeder signals.
+        '''
+        msg = "102 #"
+        return self.send(msg, response)
+
+    def r_wire(self, response=True):
+        '''
+        Stop and reset powder feeder signals.
+        '''
+        msg = "103 #"
+        return self.send(msg, response)
+
+    def configure_laser(self, laser_type, response=True):
+        '''
+        Configure robor triggers for laser and wire feeder if needed
+        0: Rofin + powder
+        1: Tumpf + wire
+        '''
+        msg = "110 " + str(int(laser_type)) + " #"
+        return self.send(msg, response)
+
     def set_cartesian(self, pose, linear=True, response=True):
         '''
         Executes a move immediately from the current pose,
         to 'pose', with units of millimeters.
         '''
-        if linear:
-            msg = "01 " + self.format_pose(pose)
-        else:
-            msg = "10 " + self.format_pose(pose)
-        return self.send(msg, response)
+        try:
+            if linear:
+                msg = "01 " + self.format_pose(pose)
+            else:
+                msg = "10 " + self.format_pose(pose)
+            return self.send(msg, response)
+        except NameError as name:
+            return str(name)
 
     def set_cartesian_trigg(self, pose, trigger=False, response=True):
         '''
@@ -120,23 +153,13 @@ class Robot:
         to 'pose', with units of millimeters. And triggers
         a digital output.
         '''
-        msg = "11 " + self.format_pose(pose)
-        msg = msg[:-1]
-        msg += str(int(trigger)) + " #"
-        return self.send(msg, response)
-
-    def set_joints(self, joints, response=True):
-        '''
-        Executes a move immediately, from current joint angles,
-        to 'joints', in degrees.
-        '''
-        if len(joints) != 6:
-            return False
-        msg = "02 "
-        for joint in joints:
-            msg += format(joint*self.scale_angle, "+08.2f") + " "
-        msg += "#"
-        return self.send(msg, response)
+        try:
+            msg = "11 " + self.format_pose(pose)
+            msg = msg[:-1]
+            msg += str(int(trigger)) + " #"
+            return self.send(msg, response)
+        except NameError as name:
+            return str(name)
 
     def get_cartesian(self):
         '''
@@ -185,9 +208,13 @@ class Robot:
         Offsets are from tool0, which is defined at the intersection of the
         tool flange center axis and the flange face.
         '''
-        msg = "06 " + self.format_pose(tool)
-        self.send(msg)
-        self.tool = tool
+        try:
+            msg = "06 " + self.format_pose(tool)
+            resp = self.send(msg)
+            self.tool = tool
+            return resp
+        except NameError as name:
+            return str(name)
 
     def load_json_tool(self, file_obj, filename):
         if file_obj.__class__.__name__ == 'str':
@@ -204,8 +231,11 @@ class Robot:
         The workobject is a local coordinate frame you can define on the robot,
         then subsequent cartesian moves will be in this coordinate frame.
         '''
-        msg = "07 " + self.format_pose(work_obj)
-        self.send(msg)
+        try:
+            msg = "07 " + self.format_pose(work_obj)
+            return self.send(msg)
+        except NameError as name:
+            return str(name)
 
     def set_speed(self, speed=[0, 50, 50, 50]):
         '''
@@ -214,13 +244,13 @@ class Robot:
         '''
 
         if len(speed) != 4:
-            return False
+            return "PARAM_ERROR"
         msg = "08 "
         msg += format(speed[0], "+08.1f") + " "
         msg += format(speed[1], "+08.2f") + " "
         msg += format(speed[2], "+08.1f") + " "
         msg += format(speed[3], "+08.2f") + " #"
-        self.send(msg)
+        return self.send(msg)
 
     def set_zone(self,
                  zone_key='z1',
@@ -261,14 +291,14 @@ class Robot:
         elif zone_key in zone_dict.keys():
             zone = zone_dict[zone_key]
         else:
-            return False
+            return "PARAM_ERROR"
 
         msg = "09 "
         msg += str(int(point_motion)) + " "
         msg += format(zone[0], "+08.4f") + " "
         msg += format(zone[1], "+08.4f") + " "
         msg += format(zone[2], "+08.4f") + " #"
-        self.send(msg)
+        return self.send(msg)
 
     def move_ext_axis(self, axis, rot_position, rot_speed):
         '''
@@ -279,57 +309,6 @@ class Robot:
         msg += str(float(rot_position)) + ' '
         msg += str(float(rot_speed)) + ' #'
         #return
-        return self.send(msg)
-
-    def buffer_add(self, pose, trigger=False, trigger_set=False):
-        '''
-        Appends single pose to the remote buffer
-        Move will execute at current speed (which you can change between
-        buffer_add calls)
-        '''
-        msg = "30 " + self.format_pose(pose)
-        if trigger:
-            msg = msg[:-1]
-            msg += str(int(trigger_set)) + " #"
-        self.send(msg)
-
-    def buffer_set(self, pose_list):
-        '''
-        Adds every pose in pose_list to the remote buffer
-        '''
-        self.clear_buffer()
-        for pose in pose_list:
-            self.buffer_add(pose)
-        if self.buffer_len() == len(pose_list):
-            log.debug('Successfully added %i poses to remote buffer',
-                      len(pose_list))
-            return True
-        else:
-            log.warn('Failed to add poses to remote buffer!')
-            self.clear_buffer()
-            return False
-
-    def clear_buffer(self):
-        msg = "31 #"
-        data = self.send(msg)
-        if self.buffer_len() != 0:
-            log.warn('clear_buffer failed! buffer_len: %i', self.buffer_len())
-            raise NameError('clear_buffer failed!')
-        return data
-
-    def buffer_len(self):
-        '''
-        Returns the length (number of poses stored) of the remote buffer
-        '''
-        msg = "32 #"
-        data = self.send(msg).split()
-        return int(float(data[2]))
-
-    def buffer_execute(self):
-        '''
-        Immediately execute linear moves to every pose in the remote buffer.
-        '''
-        msg = "33 #"
         return self.send(msg)
 
     def set_external_axis(self, axis_unscaled=[-550, 0, 0, 0, 0, 0]):
@@ -346,14 +325,17 @@ class Robot:
         Executes a movement in a circular path from current position,
         through pose_onarc, to pose_end
         '''
-        msg_0 = "35 " + self.format_pose(pose_onarc)
-        msg_1 = "36 " + self.format_pose(pose_end)
+        try:
+            msg_0 = "35 " + self.format_pose(pose_onarc)
+            msg_1 = "36 " + self.format_pose(pose_end)
 
-        data = self.send(msg_0).split()
-        if data[1] != '1':
-            log.warn('move_circular incorrect response, bailing!')
-            return False
-        return self.send(msg_1)
+            data = self.send(msg_0).split()
+            if data[1] != '1':
+                log.warn('move_circular incorrect response, bailing!')
+                return False
+            return self.send(msg_1)
+        except NameError as name:
+            return str(name)
 
     def wait_time(self, value):
         '''
@@ -373,6 +355,16 @@ class Robot:
         #return
         return self.send(msg)
 
+    def force_gdo(self, value, id=0):
+        '''
+        A function to force a value to a group of DO on the robot.
+        For this to work you're going to need to edit the RAPID function
+        and fill in the AO you want this to switch.
+        '''
+        msg = '85 ' + str(int(id)) + ' ' + str(int(value)) + ' #'
+        #return
+        return self.send(msg)
+
     def set_gdo(self, value, id=0):
         '''
         A function to set a value to a group of DO on the robot.
@@ -383,6 +375,16 @@ class Robot:
         #return
         return self.send(msg)
 
+    def force_ao(self, value, id=0):
+        '''
+        A function to force a physical AO line on the robot.
+        For this to work you're going to need to edit the RAPID function
+        and fill in the AO you want this to switch.
+        '''
+        msg = '86 ' + str(int(id)) + ' ' + str(float(value)) + ' #'
+        #return
+        return self.send(msg)
+
     def set_ao(self, value, id=0):
         '''
         A function to set a physical AO line on the robot.
@@ -390,6 +392,16 @@ class Robot:
         and fill in the AO you want this to switch.
         '''
         msg = '96 ' + str(int(id)) + ' ' + str(float(value)) + ' #'
+        #return
+        return self.send(msg)
+
+    def force_dio(self, value, id=0):
+        '''
+        A function to force a physical DIO line on the robot.
+        For this to work you're going to need to edit the RAPID function
+        and fill in the DIO you want this to switch.
+        '''
+        msg = '87 ' + str(int(id)) + ' ' + str(int(bool(value))) + ' #'
         #return
         return self.send(msg)
 
@@ -429,7 +441,7 @@ class Robot:
         return msg
 
     def close(self):
-        self.send("99 #", False)
+        self.send("99 #", True)
         self.sock.shutdown(socket.SHUT_RDWR)
         self.sock.close()
         log.info('Disconnected from ABB robot.')
@@ -444,11 +456,21 @@ class Robot:
 def check_coordinates(coordinates):
     if ((len(coordinates) == 2) and (len(coordinates[0]) == 3)
        and (len(coordinates[1]) == 4)):
+        check_quaternions(coordinates[1])
         return coordinates
     elif (len(coordinates) == 7):
+        check_quaternions(coordinates[3:7])
         return [coordinates[0:3], coordinates[3:7]]
     log.warn('Recieved malformed coordinate: %s', str(coordinates))
-    raise NameError('Malformed coordinate!')
+    raise NameError('PARAM_ERROR')
+
+def check_quaternions(quat):
+    d = 0
+    for w in quat:
+        d = d + w * w
+    if round(d, 3) != 1:
+        print 'Normalize quaternions'
+        raise NameError('PARAM_ERROR')
 
 if __name__ == '__main__':
     formatter = logging.Formatter(

@@ -28,12 +28,13 @@ PERS speeddata cartesian_speed{max_cartesian};
 PERS bool moveCompleted; !Set to true after finishing a Move instruction.
 PERS bool cartesianTriggSet{max_cartesian};
 PERS bool commandSetDO{max_cartesian};
-PERS num commandWaitTime{max_cartesian};
+PERS num numBufferAux{max_cartesian};
 PERS num extAxisMove{max_cartesian};
 
 !//Control of the laser
 !PERS triggdata laserON;
 !PERS triggdata laserOFF;
+PERS num laser_conf:=0;
 
 
 !//External axis position variables
@@ -46,15 +47,6 @@ PERS robtarget circPoint;
 !// Mutex between logger and changing the tool and work objects
 PERS bool frameMutex:=FALSE;
 PERS bool connectMutex := FALSE;
-
-!//Buffered move variables
-CONST num MAX_BUFFER := 100;
-PERS num BUFFER_POS := 6;
-PERS robtarget bufferTargets{MAX_BUFFER};
-PERS speeddata bufferSpeeds{MAX_BUFFER};
-PERS zonedata bufferZones{MAX_BUFFER};
-PERS bool bufferTriggSet{MAX_BUFFER};
-PERS bool bufferTrigg{MAX_BUFFER};
 
 
 PERS bool trajectory_lock := FALSE;

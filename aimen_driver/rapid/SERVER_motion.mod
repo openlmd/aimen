@@ -2,34 +2,23 @@ MODULE SERVER_motion
 
 
 LOCAL CONST zonedata DEFAULT_CORNER_DIST := z10;
-LOCAL VAR robtarget trajectoryTargets{MAX_BUFFER};
-LOCAL VAR speeddata trajectorySpeeds{MAX_BUFFER};
-LOCAL VAR zonedata trajectoryZones{MAX_BUFFER};
-LOCAL VAR bool trajectoryTriggSet{MAX_BUFFER};
-LOCAL VAR bool trajectoryTrigg{MAX_BUFFER};
-LOCAL VAR num trajectory_size := 0;
-LOCAL VAR intnum intr_new_trajectory;
 LOCAL VAR intnum intr_cancel_motion;
+LOCAL VAR intnum intr_configure;
 LOCAL VAR robtarget pAct;
 LOCAL VAR robtarget pActB;
 LOCAL VAR robtarget pActC;
 !//Control of the laser
-VAR triggdata laserON_fl015;
-VAR triggdata laserOFF_fl015;
+VAR triggdata laserON;
+VAR triggdata laserOFF;
+VAR triggdata wireON_tps;
+VAR triggdata wireOFF_tps;
 
-!//Parameter initialization
-!// Loads default values for
-!// - Tool.
-!// - WorkObject.
-!// - Zone.
-!// - Speed.
 PROC Initialize()
-    !currentTool := [TRUE,[[0,0,0],[1,0,0,0]],[0.001,[0,0,0.001],[1,0,0,0],0,0,0]];
-    !currentWobj := [FALSE,TRUE,"",[[0,0,0],[1,0,0,0]],[[0,0,0],[1,0,0,0]]];
-    !currentSpeed := [100, 50, 0, 0];
-    !currentZone := [FALSE, 0.3, 0.3,0.3,0.03,0.3,0.03]; !z0
-		TriggIO laserON_fl015, 0\DOp:=Do_FL_RayoLaserEnc, 1;
-		TriggIO laserOFF_fl015, 0\DOp:=Do_FL_RayoLaserEnc, 0;
+	IF laser_conf = 0 THEN
+		SetRofin;
+	ELSE
+		SetTrumpf;
+	ENDIF
 	n_cartesian_command := 1;
 	n_cartesian_motion := 1;
 	!ActUnit STN1;
@@ -38,12 +27,22 @@ PROC Initialize()
 	!externalAxis := jointsTarget.extax;
 ENDPROC
 
+PROC SetRofin()
+		TriggIO laserON, 0\DOp:=Do_FL_RayoLaserEnc, 1; !TdoPStartStat
+		TriggIO laserOFF, 0\DOp:=Do_FL_RayoLaserEnc, 0; !TdoPStartStat
+		TriggIO wireON_tps, 0\DOp:=Do_FL_RayoLaserEnc, 1; !doTPSWireF
+		TriggIO wireOFF_tps, 0\DOp:=Do_FL_RayoLaserEnc, 0; !doTPSWireF
+ENDPROC
 
+PROC SetTrumpf()
+		TriggIO laserON, 0\DOp:=TdoPStartStat, 1; !TdoPStartStat
+		TriggIO laserOFF, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
+		TriggIO wireON_tps, 0\DOp:=doTPSWireF, 1; !doTPSWireF
+		TriggIO wireOFF_tps, 0\DOp:=doTPSWireF, 0; !doTPSWireF
+ENDPROC
 
 PROC main()
-    VAR num i_fl015;
     VAR jointtarget target;
-    VAR speeddata move_speed := v10;  ! default speed
     VAR zonedata stop_mode;
 
     !//Motion configuration
@@ -54,40 +53,19 @@ PROC main()
     !//Initialization of WorkObject, Tool, Speed, Zone and Laser
     Initialize;
 
-    ! Set up interrupt to watch for new trajectory
-    IDelete intr_new_trajectory;    ! clear interrupt handler, in case restarted with ExitCycle
+    ! Set up interrupt
 	IDelete intr_cancel_motion;
-    CONNECT intr_new_trajectory WITH new_trajectory_handler;
 	CONNECT intr_cancel_motion WITH new_cancel_motion_handler;
-    IPers new_trajectory, intr_new_trajectory;
 	IPers cancel_motion, intr_cancel_motion;
 
+	IDelete intr_configure;
+	CONNECT intr_configure WITH new_configure_handler;
+	IPers laser_conf, intr_configure;
+
     WHILE true DO
-		pAct := CRobT(\Tool:=currentTool \WObj:=currentWObj);
-        ! Check for new Trajectory
-        IF (new_trajectory) THEN
-            init_trajectory;
-        ENDIF
-
-        ! execute all points in this trajectory
-        IF (trajectory_size > 0) THEN
-            FOR i_fl015 FROM 1 TO trajectory_size DO
-              TPWrite "Moving to pose: ", \Num:=i_fl015;
-              IF trajectoryTrigg{i_fl015} = FALSE THEN
-                MoveL trajectoryTargets{i_fl015}, trajectorySpeeds{i_fl015}, trajectoryZones{i_fl015}, currentTool \WObj:=currentWobj ;
-              ELSE
-                IF trajectoryTriggSet{i_fl015} = FALSE THEN
-                  TriggL trajectoryTargets{i_fl015}, trajectorySpeeds{i_fl015}, laserOFF_fl015, trajectoryZones{i_fl015}, currentTool \WObj:=currentWobj ;
-                ELSE
-                  TriggL trajectoryTargets{i_fl015}, trajectorySpeeds{i_fl015}, laserON_fl015, trajectoryZones{i_fl015}, currentTool \WObj:=currentWobj ;
-                ENDIF
-              ENDIF
-            ENDFOR
-            trajectory_size := 0;  ! trajectory done
-        ENDIF
-
+      pAct := CRobT(\Tool:=currentTool \WObj:=currentWObj);
         !Check for new motion command
-        IF n_cartesian_command <> n_cartesian_motion THEN
+      IF n_cartesian_command <> n_cartesian_motion THEN
           TEST command_type{n_cartesian_motion}
             CASE 1: !Cartesian linear move
               moveCompleted := FALSE;
@@ -122,13 +100,13 @@ PROC main()
             CASE 110: !Trigger linear OFF
               moveCompleted := FALSE;
               cartesianTarget{n_cartesian_motion}.extax := pAct.extax;
-              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserOFF_fl015, currentZone, currentTool \WObj:=currentWobj ;
+              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserOFF \T2:=wireOFF_tps, currentZone, currentTool \WObj:=currentWobj ;
 							moveCompleted := TRUE;
 
             CASE 111: !Trigger linear ON
               moveCompleted := FALSE;
               cartesianTarget{n_cartesian_motion}.extax := pAct.extax;
-              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserON_fl015, currentZone, currentTool \WObj:=currentWobj ;
+              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserON \T2:=wireON_tps, currentZone, currentTool \WObj:=currentWobj ;
 							moveCompleted := TRUE;
 
 						CASE 930: !WaitDI
@@ -145,8 +123,54 @@ PROC main()
 								WaitDI Di_FL_ErrorLaserApagado, 0;
 							ENDIF
 
+						CASE 932: !WaitDI
+							IF commandSetDO{n_cartesian_motion} THEN
+								WaitDI TdiExtActiv, 1;
+							ELSE
+								WaitDI TdiExtActiv, 0;
+							ENDIF
+
+						CASE 933: !WaitDI
+							IF commandSetDO{n_cartesian_motion} THEN
+								WaitDI TdiLaserOn, 1;
+							ELSE
+								WaitDI TdiLaserOn, 0;
+							ENDIF
+
+						CASE 934: !WaitDI
+							IF commandSetDO{n_cartesian_motion} THEN
+								WaitDI TdiLaserAsig, 1;
+							ELSE
+								WaitDI TdiLaserAsig, 0;
+							ENDIF
+
+						CASE 935: !WaitDI
+							IF commandSetDO{n_cartesian_motion} THEN
+								WaitDI TdiLaserReady, 1;
+							ELSE
+								WaitDI TdiLaserReady, 0;
+							ENDIF
+
 						CASE 94: !Wait time
-							WaitTime commandWaitTime{n_cartesian_motion};
+							WaitTime numBufferAux{n_cartesian_motion};
+
+						CASE 950: !
+							SetGO GO_FL_Programa, numBufferAux{n_cartesian_motion};
+
+						CASE 951: !
+							SetGO GO_FL_PotenciaLaser1, numBufferAux{n_cartesian_motion};
+
+						CASE 952: !
+							SetGO GoTPSJobL, numBufferAux{n_cartesian_motion};
+
+						CASE 953: !
+							SetGO TGOPROGRAM_No, numBufferAux{n_cartesian_motion};
+
+						CASE 960: !
+							SetAO AoGTV_ExternDisk, numBufferAux{n_cartesian_motion};
+
+						CASE 961: !
+							SetAO AoGTV_ExternMassflow, numBufferAux{n_cartesian_motion};
 
 						CASE 970: !Set DO gtv START
 							IF commandSetDO{n_cartesian_motion} THEN
@@ -190,6 +214,97 @@ PROC main()
 								SetDO DoRootGas, 0;
 							ENDIF
 
+						CASE 976: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO DoCossJet, 1;
+							ELSE
+								SetDO DoCossJet, 0;
+							ENDIF
+
+						CASE 977: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSReset, 1;
+							ELSE
+								SetDO doTPSReset, 0;
+							ENDIF
+
+						CASE 978: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSReady, 1;
+							ELSE
+								SetDO doTPSReady, 0;
+							ENDIF
+
+						CASE 979: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSOP0, 1;
+							ELSE
+								SetDO doTPSOP0, 0;
+							ENDIF
+
+						CASE 9710: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSOP1, 1;
+							ELSE
+								SetDO doTPSOP1, 0;
+							ENDIF
+
+						CASE 9711: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSOP2, 1;
+							ELSE
+								SetDO doTPSOP2, 0;
+							ENDIF
+
+						CASE 9712: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSWireF, 1;
+							ELSE
+								SetDO doTPSWireF, 0;
+							ENDIF
+
+						CASE 9713: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO doTPSWeld, 1;
+							ELSE
+								SetDO doTPSWeld, 0;
+							ENDIF
+
+						CASE 9714: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoLaserOn, 1;
+							ELSE
+								SetDO TdoLaserOn, 0;
+							ENDIF
+
+						CASE 9715: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoExtActiv, 1;
+							ELSE
+								SetDO TdoExtActiv, 0;
+							ENDIF
+
+						CASE 9716: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoStandBy, 1;
+							ELSE
+								SetDO TdoStandBy, 0;
+							ENDIF
+
+						CASE 9717: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoActLaser, 1;
+							ELSE
+								SetDO TdoActLaser, 0;
+							ENDIF
+
+						CASE 9718: !Set DO
+							IF commandSetDO{n_cartesian_motion} THEN
+								SetDO TdoPStartStat, 1;
+							ELSE
+								SetDO TdoPStartStat, 0;
+							ENDIF
+
             DEFAULT:
 				TPWrite "SERVER_motion: Illegal instruction code: ", \Num:=command_type{n_cartesian_motion};
           ENDTEST
@@ -200,50 +315,64 @@ PROC main()
         WaitTime 0.1;  ! Throttle loop while waiting for new command
     ENDWHILE
 ERROR
-    ErrWrite \W, "Motion Error", "Error executing motion.  Aborting trajectory.";
-    abort_trajectory;
+	TEST ERRNO
+			CASE ERR_NORUNUNIT:
+					TPWrite "MOTION: No contact with unit.";
+					TRYNEXT;
+			DEFAULT:
+					ErrWrite \W, "Motion Error", "Error executing motion.  Aborting trajectory.";
+					abort_trajectory;
+	ENDTEST
 ENDPROC
-LOCAL PROC init_trajectory()
-    clear_path;                       ! cancel any active motions
-    WaitTestAndSet trajectory_lock;   ! acquire data-lock
-      trajectoryTargets := bufferTargets;    ! copy to local var
-      trajectory_size := BUFFER_POS;  ! copy to local var
-      trajectorySpeeds := bufferSpeeds;
-      trajectoryZones := bufferZones;
-      trajectoryTriggSet := bufferTriggSet;
-      trajectoryTrigg := bufferTrigg;
-      new_trajectory := FALSE;
-    trajectory_lock := FALSE;         ! release data-lock
-ENDPROC
+
 LOCAL PROC abort_trajectory()
-    trajectory_size := 0;  ! "clear" local trajectory
     clear_path;
     ExitCycle;  ! restart program
 ENDPROC
+
 LOCAL PROC clear_path()
     IF ( NOT (IsStopMoveAct(\FromMoveTask) OR IsStopMoveAct(\FromNonMoveTask)) )
         StopMove;          ! stop any active motions
-    ClearPath;             ! clear queued motion commands
     StartMove;             ! re-enable motions
 ENDPROC
-LOCAL TRAP new_trajectory_handler
-    IF (NOT new_trajectory) RETURN;
 
-    abort_trajectory;
-ENDTRAP
 LOCAL TRAP new_cancel_motion_handler
 	IF (NOT cancel_motion) RETURN;
 	! Reset
 	cancel_motion := FALSE;
 	n_cartesian_motion := n_cartesian_command;
-	abort_trajectory;
 	SetDO Do_FL_RayoLaserEnc, 0;
+	SetDO TdoPStartStat, 0;
 	SetDO doGTV_StartExtern, 0;
 	SetDO doGTV_Stop, 0;
+	SetDO doTPSWireF, 0;
 	SetDO Do_FL_RedENC, 0;
 	SetDO Do_FL_StandByEnc, 0;
-	!clear_path;
+	SetDO TdoExtActiv, 0;
+	SetDO TdoLaserOn, 0;
+	SetDO TdoStandBy, 0;
+	SetDO TdoActLaser, 0;
+	abort_trajectory;
+	ERROR
+		TEST ERRNO
+				CASE ERR_NORUNUNIT:
+						TRYNEXT;
+				DEFAULT:
+						ErrWrite \W, "Motion Error", "Error executing motion.  Aborting trajectory.";
+						abort_trajectory;
+		ENDTEST
 ENDTRAP
 
+LOCAL TRAP new_configure_handler
+	IF laser_conf = 0 THEN
+		SetRofin;
+	ELSEIF laser_conf = 1 THEN
+		SetTrumpf;
+	ELSE
+		TPWrite "MOTION: Invalid configure number: ", \Num:=laser_conf;
+	ENDIF
+	ERROR
+		ErrWrite \W, "Configuring error", "Error configuring laser.";
+ENDTRAP
 
 ENDMODULE

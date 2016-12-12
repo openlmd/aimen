@@ -1,6 +1,7 @@
 <launch>
   <arg name="robot_ip" default="172.20.0.100" />
   <arg name="J23_coupled" default="true" />
+  <arg name="laser_type" default="rofin" />
 
   <node name="robot_logger" pkg="aimen_driver" type="nd_robot_logger.py">
     <param name="robot_ip" type="str" value="$(arg robot_ip)" />
@@ -9,5 +10,6 @@
 
   <node name="robot_server" pkg="aimen_driver" type="nd_robot_server.py">
     <param name="robot_ip" type="str" value="$(arg robot_ip)" />
+    <param name="laser_type" type="str" value="$(arg laser_type)" />
   </node>
 </launch>
