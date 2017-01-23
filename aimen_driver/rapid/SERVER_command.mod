@@ -100,7 +100,7 @@ PROC FullReset ()
     SetDO Do_FL_RayoLaserEnc, 0;
     SetDO TdoPStartStat, 0;
     SetDO Do_FL_StandByEnc, 0;
-    SetDO Do_FL_RedENC, 0;
+    !SetDO Do_FL_RedENC, 0;
     SetDO doGTV_StartExtern, 0;
     SetDO DoWeldGas, 0;
     SetDO DoRootGas, 0;
@@ -122,7 +122,7 @@ PROC Reconnect ()
     SocketClose serverSocket;
     !//Reinitiate the server
     ServerCreateAndConnect ipController,serverPort;
-    reconnected:= TRUE;
+    reconnected:= FALSE;
     connected:= TRUE;
 ENDPROC
 !///////////////////////////
