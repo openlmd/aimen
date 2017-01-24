@@ -68,15 +68,19 @@ class Robot:
         self.joints.append(data)
 
     def read_raw_logger(self):
-        raw_data = self.s.recv(4096)
-        if len(raw_data) > 27:
-            n_joints = unpack('i', raw_data[:4])[0]
-            if n_joints == 32:
-                self.float_joints.append(unpack('ffffffff',
-                                         raw_data[4:n_joints+4]))
-            elif n_joints == 24:
-                self.float_joints.append(unpack('ffffff',
-                                         raw_data[4:n_joints+4]))
+        try:
+            raw_data = self.s.recv(4096)
+            if len(raw_data) > 27:
+                n_joints = unpack('i', raw_data[:4])[0]
+                if n_joints == 32:
+                    self.float_joints.append(unpack('ffffffff',
+                                             raw_data[4:n_joints+4]))
+                elif n_joints == 24:
+                    self.float_joints.append(unpack('ffffff',
+                                             raw_data[4:n_joints+4]))
+            return True
+        except socket.error, e:
+            return False
 
     def set_units(self, linear, angular):
         units_l = {'millimeters': 1.0,

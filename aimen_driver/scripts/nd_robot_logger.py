@@ -27,7 +27,8 @@ class NdRobotLogger():
 
     def talker(self, j23_coupled=True):
         while not rospy.is_shutdown():
-            self.logger_robot.read_raw_logger()
+            if not self.logger_robot.read_raw_logger():
+                break
             if len(self.logger_robot.float_joints) > 0:
                 self.msg_joint_state.header.stamp = rospy.Time.now()
                 joints_pose = self.logger_robot.float_joints.popleft()
