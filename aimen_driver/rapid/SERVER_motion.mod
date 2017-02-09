@@ -346,7 +346,7 @@ LOCAL TRAP new_cancel_motion_handler
 	SetDO doGTV_StartExtern, 0;
 	SetDO doGTV_Stop, 0;
 	SetDO doTPSWireF, 0;
-	SetDO Do_FL_RedENC, 0;
+	!SetDO Do_FL_RedENC, 0;
 	SetDO Do_FL_StandByEnc, 0;
 	SetDO TdoExtActiv, 0;
 	SetDO TdoLaserOn, 0;
