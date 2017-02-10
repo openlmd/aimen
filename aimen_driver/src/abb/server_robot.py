@@ -215,13 +215,13 @@ class ServerRobot(Robot):
                 else:
                     return r
             if self.instructionCount == 6:
-                r = self.wait_input(1, 4)  # TdiLaserAsig: 1
+                r = self.set_group((28, 3))  # TGOPROGRAM_No: 100
                 if r.split()[2] == 'BUFFER_OK':
                     self.instructionCount += 1
                 else:
                     return r
             if self.instructionCount == 7:
-                r = self.set_group((28, 3))  # TGOPROGRAM_No: 100
+                r = self.wait_input(1, 4)  # TdiLaserAsig: 1
                 if r.split()[2] == 'BUFFER_OK':
                     self.instructionCount += 1
                 else:
@@ -232,17 +232,6 @@ class ServerRobot(Robot):
                     self.instructionCount += 1
                 else:
                     return r
-            if self.instructionCount == 9:
-                r = self.set_digital((1, 6))  # DoCossJet: 1
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount += 1
-                else:
-                    return r
-            if self.instructionCount == 10:
-                r = self.set_digital((1, 5))  # DoRootGas: 1
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount = 0
-                return r
         else:
             if self.instructionCount == 0:
                 r = self.set_digital((0, 17))  # TdoActLaser: 0
@@ -268,17 +257,6 @@ class ServerRobot(Robot):
                     self.instructionCount += 1
                 else:
                     return r
-            if self.instructionCount == 4:
-                r = self.set_digital((0, 6))  # DoCossJet: 0
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount += 1
-                else:
-                    return r
-            if self.instructionCount == 5:
-                r = self.set_digital((0, 5))  # DoRootGas: 0
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount = 0
-                return r
 
     def laser_ready(self, ready):
         if self.laser == 'rofin':
@@ -401,6 +379,7 @@ class ServerRobot(Robot):
         return self.r_laser()
 
     def reset_powder(self):
+        #TODO: Cambiar parámetro laser por un tipo de alimentación
         if self.laser == 'rofin':
             return self.r_powder()
 

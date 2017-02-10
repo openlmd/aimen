@@ -37,8 +37,11 @@ ENDPROC
 PROC SetTrumpf()
 		TriggIO laserON, 0\DOp:=TdoPStartStat, 1; !TdoPStartStat
 		TriggIO laserOFF, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
-		TriggIO wireON_tps, 0\DOp:=doTPSWireF, 1; !doTPSWireF
-		TriggIO wireOFF_tps, 0\DOp:=doTPSWireF, 0; !doTPSWireF
+		!TODO: Separar set laser trumpf da alimentadora de fio, neste e nos demais archivos
+		TriggIO wireON_tps, 0\DOp:=TdoPStartStat, 1; !TdoPStartStat
+		TriggIO wireOFF_tps, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
+		!TriggIO wireON_tps, 0\DOp:=doTPSWireF, 1; !doTPSWireF
+		!TriggIO wireOFF_tps, 0\DOp:=doTPSWireF, 0; !doTPSWireF
 ENDPROC
 
 PROC main()

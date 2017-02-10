@@ -101,7 +101,7 @@ PROC FullReset ()
     SetDO TdoPStartStat, 0;
     SetDO Do_FL_StandByEnc, 0;
     !SetDO Do_FL_RedENC, 0;
-    SetDO doGTV_StartExtern, 0;
+    !SetDO doGTV_StartExtern, 0;
     SetDO DoWeldGas, 0;
     SetDO DoRootGas, 0;
     SetDO DoCossJet, 0;
