@@ -4,6 +4,7 @@ MODULE SERVER_motion
 LOCAL CONST zonedata DEFAULT_CORNER_DIST := z10;
 LOCAL VAR intnum intr_cancel_motion;
 LOCAL VAR intnum intr_configure;
+LOCAL VAR intnum intr_configure_feeder;
 LOCAL VAR robtarget pAct;
 LOCAL VAR robtarget pActB;
 LOCAL VAR robtarget pActC;
@@ -18,6 +19,9 @@ PROC Initialize()
 		SetRofin;
 	ELSE
 		SetTrumpf;
+	ENDIF
+	IF feeder_conf = 1 THEN
+		SetWire;
 	ENDIF
 	n_cartesian_command := 1;
 	n_cartesian_motion := 1;
@@ -37,11 +41,13 @@ ENDPROC
 PROC SetTrumpf()
 		TriggIO laserON, 0\DOp:=TdoPStartStat, 1; !TdoPStartStat
 		TriggIO laserOFF, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
-		!TODO: Separar set laser trumpf da alimentadora de fio, neste e nos demais archivos
 		TriggIO wireON_tps, 0\DOp:=TdoPStartStat, 1; !TdoPStartStat
 		TriggIO wireOFF_tps, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
-		!TriggIO wireON_tps, 0\DOp:=doTPSWireF, 1; !doTPSWireF
-		!TriggIO wireOFF_tps, 0\DOp:=doTPSWireF, 0; !doTPSWireF
+ENDPROC
+
+PROC SetWire()
+		TriggIO wireON_tps, 0\DOp:=doTPSWireF, 1; !doTPSWireF
+		TriggIO wireOFF_tps, 0\DOp:=doTPSWireF, 0; !doTPSWireF
 ENDPROC
 
 PROC main()
@@ -64,6 +70,10 @@ PROC main()
 	IDelete intr_configure;
 	CONNECT intr_configure WITH new_configure_handler;
 	IPers laser_conf, intr_configure;
+
+	IDelete intr_configure_feeder;
+	CONNECT intr_configure_feeder WITH new_configure_handler;
+	IPers feeder_conf, intr_configure_feeder;
 
     WHILE true DO
       pAct := CRobT(\Tool:=currentTool \WObj:=currentWObj);
@@ -372,10 +382,18 @@ LOCAL TRAP new_configure_handler
 	ELSEIF laser_conf = 1 THEN
 		SetTrumpf;
 	ELSE
-		TPWrite "MOTION: Invalid configure number: ", \Num:=laser_conf;
+		TPWrite "MOTION: Invalid laser configure number: ", \Num:=laser_conf;
 	ENDIF
 	ERROR
 		ErrWrite \W, "Configuring error", "Error configuring laser.";
+ENDTRAP
+
+LOCAL TRAP new_feeder_configure_handler
+	IF feeder_conf = 1 THEN
+		SetWire;
+	ENDIF
+	ERROR
+		ErrWrite \W, "Configuring error", "Error configuring feeder.";
 ENDTRAP
 
 ENDMODULE

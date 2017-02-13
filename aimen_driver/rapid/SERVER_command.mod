@@ -872,6 +872,12 @@ PROC main()
               ELSE
                 ok :=SERVER_BAD_MSG;
               ENDIF
+            CASE 111: !Configure feeder
+              IF nParams = 1 THEN
+                feeder_conf := params{1};
+              ELSE
+                ok :=SERVER_BAD_MSG;
+              ENDIF
                   DEFAULT:
                       TPWrite "SERVER: Illegal instruction code";
                       ok := SERVER_BAD_MSG;

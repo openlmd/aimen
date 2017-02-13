@@ -35,6 +35,7 @@ PERS num extAxisMove{max_cartesian};
 !PERS triggdata laserON;
 !PERS triggdata laserOFF;
 PERS num laser_conf:=0;
+PERS num feeder_conf:=0;
 
 
 !//External axis position variables

@@ -131,11 +131,20 @@ class Robot:
     def configure_laser(self, laser_type, response=True):
         '''
         Configure robor triggers for laser and wire feeder if needed
-        0: Rofin + powder
-        1: Tumpf + wire
+        0: Rofin
+        1: Tumpf
         '''
         msg = "110 " + str(int(laser_type)) + " #"
         return self.send(msg, response)
+
+    def configure_feeder(self, feeder_type, response=True):
+        '''
+        Configure robor triggers for laser and wire feeder if needed
+        0: powder
+        1: wire
+        '''
+        msg = "111 " + str(int(feeder_type)) + " #"
+        return self.send(msg,response)
 
     def set_cartesian(self, pose, linear=True, response=True):
         '''
