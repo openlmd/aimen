@@ -99,7 +99,7 @@ PROC FullReset ()
     cancel_motion := TRUE;
     SetDO Do_FL_RayoLaserEnc, 0;
     SetDO TdoPStartStat, 0;
-    SetDO Do_FL_StandByEnc, 0;
+    !SetDO Do_FL_StandByEnc, 0;
     !SetDO Do_FL_RedENC, 0;
     !SetDO doGTV_StartExtern, 0;
     SetDO DoWeldGas, 0;
@@ -841,7 +841,7 @@ PROC main()
               IF nParams = 0 THEN
                 SetDO TdoPStartStat, 0;
                 SetDO Do_FL_RayoLaserEnc, 0;
-                SetDO Do_FL_StandByEnc, 0;
+                !SetDO Do_FL_StandByEnc, 0;
                 !SetDO Do_FL_RedENC, 0;
                 SetDO DoCossJet, 0;
                 SetDO DoRootGas, 0;
@@ -879,7 +879,7 @@ PROC main()
                 ok :=SERVER_BAD_MSG;
               ENDIF
                   DEFAULT:
-                      TPWrite "SERVER: Illegal instruction code";
+                      TPWrite "SERVER: Illegal instruction code", \Num:=instructionCode;
                       ok := SERVER_BAD_MSG;
         ENDTEST
 

@@ -9,8 +9,8 @@ LOCAL VAR robtarget pAct;
 LOCAL VAR robtarget pActB;
 LOCAL VAR robtarget pActC;
 !//Control of the laser
-VAR triggdata laserON;
-VAR triggdata laserOFF;
+VAR triggdata laser_ON;
+VAR triggdata laser_OFF;
 VAR triggdata wireON_tps;
 VAR triggdata wireOFF_tps;
 
@@ -32,15 +32,15 @@ PROC Initialize()
 ENDPROC
 
 PROC SetRofin()
-		TriggIO laserON, 0\DOp:=Do_FL_RayoLaserEnc, 1; !TdoPStartStat
-		TriggIO laserOFF, 0\DOp:=Do_FL_RayoLaserEnc, 0; !TdoPStartStat
+		TriggIO laser_ON, 0\DOp:=Do_FL_RayoLaserEnc, 1; !TdoPStartStat
+		TriggIO laser_OFF, 0\DOp:=Do_FL_RayoLaserEnc, 0; !TdoPStartStat
 		TriggIO wireON_tps, 0\DOp:=Do_FL_RayoLaserEnc, 1; !doTPSWireF
 		TriggIO wireOFF_tps, 0\DOp:=Do_FL_RayoLaserEnc, 0; !doTPSWireF
 ENDPROC
 
 PROC SetTrumpf()
-		TriggIO laserON, 0\DOp:=TdoPStartStat, 1; !TdoPStartStat
-		TriggIO laserOFF, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
+		TriggIO laser_ON, 0\DOp:=TdoPStartStat, 1; !TdoPStartStat
+		TriggIO laser_OFF, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
 		TriggIO wireON_tps, 0\DOp:=TdoPStartStat, 1; !TdoPStartStat
 		TriggIO wireOFF_tps, 0\DOp:=TdoPStartStat, 0; !TdoPStartStat
 ENDPROC
@@ -113,13 +113,13 @@ PROC main()
             CASE 110: !Trigger linear OFF
               moveCompleted := FALSE;
               cartesianTarget{n_cartesian_motion}.extax := pAct.extax;
-              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserOFF \T2:=wireOFF_tps, currentZone, currentTool \WObj:=currentWobj ;
+              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laser_OFF \T2:=wireOFF_tps, currentZone, currentTool \WObj:=currentWobj ;
 							moveCompleted := TRUE;
 
             CASE 111: !Trigger linear ON
               moveCompleted := FALSE;
               cartesianTarget{n_cartesian_motion}.extax := pAct.extax;
-              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laserON \T2:=wireON_tps, currentZone, currentTool \WObj:=currentWobj ;
+              TriggL cartesianTarget{n_cartesian_motion}, cartesian_speed{n_cartesian_motion}, laser_ON \T2:=wireON_tps, currentZone, currentTool \WObj:=currentWobj ;
 							moveCompleted := TRUE;
 
 						CASE 930: !WaitDI
@@ -360,11 +360,11 @@ LOCAL TRAP new_cancel_motion_handler
 	SetDO doGTV_Stop, 0;
 	SetDO doTPSWireF, 0;
 	!SetDO Do_FL_RedENC, 0;
-	SetDO Do_FL_StandByEnc, 0;
-	SetDO TdoExtActiv, 0;
-	SetDO TdoLaserOn, 0;
-	SetDO TdoStandBy, 0;
-	SetDO TdoActLaser, 0;
+	!SetDO Do_FL_StandByEnc, 0;
+	!SetDO TdoExtActiv, 0;
+	!SetDO TdoLaserOn, 0;
+	!SetDO TdoStandBy, 0;
+	!SetDO TdoActLaser, 0;
 	abort_trajectory;
 	ERROR
 		TEST ERRNO
