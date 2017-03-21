@@ -68,15 +68,19 @@ class Robot:
         self.joints.append(data)
 
     def read_raw_logger(self):
-        raw_data = self.s.recv(4096)
-        if len(raw_data) > 27:
-            n_joints = unpack('i', raw_data[:4])[0]
-            if n_joints == 32:
-                self.float_joints.append(unpack('ffffffff',
-                                         raw_data[4:n_joints+4]))
-            elif n_joints == 24:
-                self.float_joints.append(unpack('ffffff',
-                                         raw_data[4:n_joints+4]))
+        try:
+            raw_data = self.s.recv(4096)
+            if len(raw_data) > 27:
+                n_joints = unpack('i', raw_data[:4])[0]
+                if n_joints == 32:
+                    self.float_joints.append(unpack('ffffffff',
+                                             raw_data[4:n_joints+4]))
+                elif n_joints == 24:
+                    self.float_joints.append(unpack('ffffff',
+                                             raw_data[4:n_joints+4]))
+            return True
+        except socket.error, e:
+            return False
 
     def set_units(self, linear, angular):
         units_l = {'millimeters': 1.0,
@@ -127,11 +131,20 @@ class Robot:
     def configure_laser(self, laser_type, response=True):
         '''
         Configure robor triggers for laser and wire feeder if needed
-        0: Rofin + powder
-        1: Tumpf + wire
+        0: Rofin
+        1: Tumpf
         '''
         msg = "110 " + str(int(laser_type)) + " #"
         return self.send(msg, response)
+
+    def configure_feeder(self, feeder_type, response=True):
+        '''
+        Configure robor triggers for laser and wire feeder if needed
+        0: powder
+        1: wire
+        '''
+        msg = "111 " + str(int(feeder_type)) + " #"
+        return self.send(msg,response)
 
     def set_cartesian(self, pose, linear=True, response=True):
         '''

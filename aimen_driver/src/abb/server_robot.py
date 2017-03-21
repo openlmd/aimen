@@ -22,6 +22,13 @@ class ServerRobot(Robot):
         else:
             return self.configure_laser(1)
 
+    def set_feeder_type(self, feeder_type):
+        self.feeder = feeder_type.lower()
+        if self.feeder == 'powder':
+            return self.configure_feeder(0)
+        else:
+            return self.configure_feeder(1)
+
     def disconnect(self):
         self.close()
 
@@ -215,13 +222,13 @@ class ServerRobot(Robot):
                 else:
                     return r
             if self.instructionCount == 6:
-                r = self.wait_input(1, 4)  # TdiLaserAsig: 1
+                r = self.set_group((28, 3))  # TGOPROGRAM_No: 100
                 if r.split()[2] == 'BUFFER_OK':
                     self.instructionCount += 1
                 else:
                     return r
             if self.instructionCount == 7:
-                r = self.set_group((28, 3))  # TGOPROGRAM_No: 100
+                r = self.wait_input(1, 4)  # TdiLaserAsig: 1
                 if r.split()[2] == 'BUFFER_OK':
                     self.instructionCount += 1
                 else:
@@ -232,17 +239,6 @@ class ServerRobot(Robot):
                     self.instructionCount += 1
                 else:
                     return r
-            if self.instructionCount == 9:
-                r = self.set_digital((1, 6))  # DoCossJet: 1
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount += 1
-                else:
-                    return r
-            if self.instructionCount == 10:
-                r = self.set_digital((1, 5))  # DoRootGas: 1
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount = 0
-                return r
         else:
             if self.instructionCount == 0:
                 r = self.set_digital((0, 17))  # TdoActLaser: 0
@@ -268,17 +264,6 @@ class ServerRobot(Robot):
                     self.instructionCount += 1
                 else:
                     return r
-            if self.instructionCount == 4:
-                r = self.set_digital((0, 6))  # DoCossJet: 0
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount += 1
-                else:
-                    return r
-            if self.instructionCount == 5:
-                r = self.set_digital((0, 5))  # DoRootGas: 0
-                if r.split()[2] == 'BUFFER_OK':
-                    self.instructionCount = 0
-                return r
 
     def laser_ready(self, ready):
         if self.laser == 'rofin':
@@ -293,7 +278,6 @@ class ServerRobot(Robot):
             return self.set_group((pwr, 1))  # laser power
 
     def wire_set(self, state):
-        #TODO:
         if state:
             if self.instructionCount == 0:
                 r = self.set_digital((1, 7))  # doTPSReset: 1
@@ -385,12 +369,12 @@ class ServerRobot(Robot):
                 return r
 
     def carrier(self, carrierflow):
-        if self.laser == 'rofin':
+        if self.feeder == 'powder':
             carrier = int((carrierflow * 100) / 15)  # digital value
             return self.set_analog((carrier, 1))  # gtv_massflow
 
     def turntable(self, turntablespeed):
-        if self.laser == 'rofin':
+        if self.feeder == 'powder':
             turntable = int((turntablespeed * 100) / 10)  # digital value
             return self.set_analog((turntable, 0))  # gtv_disk
 
@@ -401,11 +385,11 @@ class ServerRobot(Robot):
         return self.r_laser()
 
     def reset_powder(self):
-        if self.laser == 'rofin':
+        if self.feeder == 'powder':
             return self.r_powder()
 
     def reset_wire(self):
-        if self.laser == 'trumpf':
+        if self.feeder == 'wire':
             return self.r_wire()
 
 

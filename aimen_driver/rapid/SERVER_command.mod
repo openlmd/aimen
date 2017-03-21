@@ -99,8 +99,9 @@ PROC FullReset ()
     cancel_motion := TRUE;
     SetDO Do_FL_RayoLaserEnc, 0;
     SetDO TdoPStartStat, 0;
-    SetDO Do_FL_StandByEnc, 0;
-    SetDO doGTV_StartExtern, 0;
+    !SetDO Do_FL_StandByEnc, 0;
+    !SetDO Do_FL_RedENC, 0;
+    !SetDO doGTV_StartExtern, 0;
     SetDO DoWeldGas, 0;
     SetDO DoRootGas, 0;
     SetDO DoCossJet, 0;
@@ -121,7 +122,7 @@ PROC Reconnect ()
     SocketClose serverSocket;
     !//Reinitiate the server
     ServerCreateAndConnect ipController,serverPort;
-    reconnected:= TRUE;
+    reconnected:= FALSE;
     connected:= TRUE;
 ENDPROC
 !///////////////////////////
@@ -840,7 +841,8 @@ PROC main()
               IF nParams = 0 THEN
                 SetDO TdoPStartStat, 0;
                 SetDO Do_FL_RayoLaserEnc, 0;
-                SetDO Do_FL_StandByEnc, 0;
+                !SetDO Do_FL_StandByEnc, 0;
+                !SetDO Do_FL_RedENC, 0;
                 SetDO DoCossJet, 0;
                 SetDO DoRootGas, 0;
                 ok := SERVER_OK;
@@ -870,8 +872,14 @@ PROC main()
               ELSE
                 ok :=SERVER_BAD_MSG;
               ENDIF
+            CASE 111: !Configure feeder
+              IF nParams = 1 THEN
+                feeder_conf := params{1};
+              ELSE
+                ok :=SERVER_BAD_MSG;
+              ENDIF
                   DEFAULT:
-                      TPWrite "SERVER: Illegal instruction code";
+                      TPWrite "SERVER: Illegal instruction code", \Num:=instructionCode;
                       ok := SERVER_BAD_MSG;
         ENDTEST
 
