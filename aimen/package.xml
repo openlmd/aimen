@@ -1,10 +1,10 @@
 <package>
   <name>aimen</name>
-  <version>0.4.0</version>
+  <version>0.5.1</version>
   <description>This package provides aimen packages.</description>
-  <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
+  <maintainer email="baltasar.lodeiro@aimen.es">Baltasar Lodeiro-Señarís</maintainer>
   <license>BSD</license>
-  
+
   <url type="website">http://openlmd.github.io/aimen.html</url>
   <url type="repository">https://github.com/openlmd/aimen</url>
 
