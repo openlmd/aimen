@@ -481,7 +481,7 @@ def check_quaternions(quat):
     d = 0
     for w in quat:
         d = d + w * w
-    if round(d, 3) != 1:
+    if round(d, 2) != 1:
         print 'Normalize quaternions'
         raise NameError('PARAM_ERROR')
 
