@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import json
 import rospy
+import socket
 
 from aimen_driver.srv import SrvRobotCommand
 from aimen_driver.srv import SrvRobotCommandResponse
@@ -19,7 +20,26 @@ class NdRobotServer():
         laser_type = rospy.get_param('~laser_type', 'rofin')
         feeder_type = rospy.get_param('~feeder_type', 'powder')
         self.server_robot = ServerRobot()
-        self.server_robot.connect(robot_ip)
+        connected = False
+        for i in range(10):
+            try:
+                self.server_robot.connect(robot_ip)
+                connected = True
+                break
+            except socket.timeout:
+                print 'Timed out'
+                rospy.logerr('Timed out')
+                rospy.sleep(1)
+                continue
+            except socket.error:
+                print 'Network is unreachable'
+                rospy.logerr('Network is unreachable')
+                rospy.sleep(1)
+                continue
+        if not connected:
+            rospy.signal_shutdown('Socket timed out')
+            rospy.spin()
+            return
         print self.server_robot.set_laser_type(laser_type)
         print self.server_robot.set_feeder_type(feeder_type)
 

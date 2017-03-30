@@ -3,6 +3,7 @@ import rospy
 import numpy as np
 from sensor_msgs.msg import JointState
 from abb.logger_robot import LoggerRobot
+import socket
 
 
 class NdRobotLogger():
@@ -22,7 +23,27 @@ class NdRobotLogger():
         j23_coupled = rospy.get_param('~J23_coupled', True)
 
         self.logger_robot = LoggerRobot()
-        self.logger_robot.connect(robot_ip)
+        #self.logger_robot.connect(robot_ip)
+        connected = False
+        for i in range(10):
+            try:
+                self.logger_robot.connect(robot_ip)
+                connected = True
+                break
+            except socket.timeout:
+                print 'Timed out'
+                rospy.logerr('Timed out')
+                rospy.sleep(1)
+                continue
+            except socket.error:
+                print 'Network is unreachable'
+                rospy.logerr('Network is unreachable')
+                rospy.sleep(1)
+                continue
+        if not connected:
+            rospy.signal_shutdown('Socket timed out')
+            rospy.spin()
+            return
         self.talker(j23_coupled)
 
     def talker(self, j23_coupled=True):
