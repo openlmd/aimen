@@ -5,9 +5,9 @@
     <link name="world"/>
 
     <!-- Robot -->
-    <xacro:include filename="$(find aimen_workcell)/urdf/abb_robot.xacro"/>
+    <xacro:include filename="$(find aimen_workcell)/urdf/abb_robot.xacro"/> <!-- kuka_robot -->
 
-    <joint name="abb_robot" type="fixed">
+    <joint name="abb_robot" type="fixed"> <!-- kuka_robot -->
         <parent link="world"/>
         <child link="base_link"/>
         <origin xyz="0 0 0.067" rpy="0 0 0"/>

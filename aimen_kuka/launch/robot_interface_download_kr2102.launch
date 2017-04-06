@@ -1,0 +1,15 @@
+<!--
+Manipulator specific version of kuka_driver's 'robot_interface.launch'.
+Defaults provided for KR 210-2:
+- J23_coupled = true
+Usage:
+robot_interface_download_kr2102.launch robot_ip:=<value>
+-->
+<launch>
+    <arg name="robot_ip" />
+    <rosparam command="load" file="$(find aimen_kuka)/config/joint_names_kr2102.yaml" />
+
+    <include file="$(find aimen_driver)/launch/robot_interface.launch">
+        <arg name="robot_ip" value="$(arg robot_ip)" />
+    </include>
+</launch>

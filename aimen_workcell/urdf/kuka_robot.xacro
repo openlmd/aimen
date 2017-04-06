@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<robot name="kuka_robot" xmlns:xacro="http://ros.org/wiki/xacro">
+    <property name="pi" value="3.141592654"/>
+
+    <!-- Robot -->
+    <xacro:include filename="$(find aimen_kuka)/urdf/kr2102_macro.xacro"/>
+    <xacro:kuka_kr2102 prefix=""/>
+
+    <joint name="kr2102" type="fixed">
+        <parent link="world"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Robot table -->
+    <xacro:include filename="$(find aimen_workcell)/urdf/irbp_a250.xacro"/>
+
+    <joint name="irbp_a250" type="fixed">
+        <parent link="world"/>
+        <child link="irbp_a250/base_link"/>
+        <origin xyz="1.753 0.015 -0.003" rpy="-0.005599 -0.005742 1.550718"/>
+    </joint>
+</robot>
