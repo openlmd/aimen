@@ -3,10 +3,10 @@
     <property name="pi" value="3.141592654"/>
 
     <!-- Robot -->
-    <xacro:include filename="$(find aimen_kuka)/urdf/kr2102_macro.xacro"/>
-    <xacro:kuka_kr2102 prefix=""/>
+    <xacro:include filename="$(find aimen_kuka)/urdf/kr1502_macro.xacro"/>
+    <xacro:kuka_kr1502 prefix=""/>
 
-    <joint name="kr2102" type="fixed">
+    <joint name="kr1502" type="fixed">
         <parent link="world"/>
         <child link="base_link"/>
         <origin xyz="0 0 0" rpy="0 0 0"/>
