@@ -18,7 +18,7 @@
 					<mesh filename="package://aimen_kuka/meshes/kr1502/visual/base_link.stl"/>
 				</geometry>
 				<material name="kuka_color">
-					<color rgba="1.0 0.487 0 1.0"/>
+					<color rgba="${246/255} ${120/255} ${ 40/255} 1.0"/>
 				</material>
 			</visual>
 			<collision>

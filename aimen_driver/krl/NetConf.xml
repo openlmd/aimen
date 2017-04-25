@@ -1,0 +1,28 @@
+<ETHERNETKRL>
+	<CONFIGURATION>
+		<EXTERNAL>
+			<IP>172.18.0.3</IP>
+			<PORT>59152</PORT>
+			<TYPE>Server</TYPE>
+		</EXTERNAL>
+		<INTERNAL>
+		  <ENVIRONMENT>Submit</ENVIRONMENT>
+		  <TIMEOUT Connect="2000"/>
+		  <ALIVE Set_Flag="100" Ping="5"/>
+		  <IP>172.18.0.4</IP>
+		  <PORT>59152</PORT>
+		  <PROTOCOL>TCP</PROTOCOL>
+		</INTERNAL>
+	</CONFIGURATION>
+	<RECEIVE/>
+	<SEND>
+		<XML>
+			<ELEMENT Tag="RobotToPC/Axis/@A1"/>
+			<ELEMENT Tag="RobotToPC/Axis/@A2"/>
+			<ELEMENT Tag="RobotToPC/Axis/@A3"/>
+			<ELEMENT Tag="RobotToPC/Axis/@A4"/>
+			<ELEMENT Tag="RobotToPC/Axis/@A5"/>
+			<ELEMENT Tag="RobotToPC/Axis/@A6"/>
+		</XML>
+	</SEND>
+</ETHERNETKRL>

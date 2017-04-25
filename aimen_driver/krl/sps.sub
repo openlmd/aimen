@@ -1,0 +1,51 @@
+&ACCESS RVO
+&REL 13
+&COMMENT PLC on control
+DEF sps( )
+
+  ;FOLD Declaration
+  DECL EKI_STATUS RET
+  DECL AXIS ROBAXIS
+  ;ENDFOLD
+
+  ;FOLD Initialize sample data
+  ROBAXIS={A1 0,A2 0,A3 0,A4 0,A5 0,A6 0}
+  ;ENDFOLD
+
+
+  RET=EKI_Init("NetConf")
+    WAIT SEC 0.5
+  RET=EKI_Open("NetConf")
+  wait for $FLAG[100]
+
+  LOOP
+    $TIMER_STOP[1]=FALSE
+    WAIT FOR NOT($POWER_FAIL)
+    ;FOLD USER PLC
+    ;Make your modifications here
+    ; wait until server is conntected
+
+    EKI_CHECK(RET,#STATE,"NetConf")
+    IF $FLAG[100]==FALSE THEN
+      ;RET=EKI_Open("NetConf") ;É necesario?
+      WAIT FOR $FLAG[100]
+    ELSE
+      IF $TIMER[1]>24 THEN
+        ROBAXIS = $AXIS_ACT
+        ;RET = EKI_SetReal("NetConf","RobotToPC/Axis",ROBAXIS)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A1",ROBAXIS.A1)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A2",ROBAXIS.A2)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A3",ROBAXIS.A3)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A4",ROBAXIS.A4)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A5",ROBAXIS.A5)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A6",ROBAXIS.A6)
+        RET = EKI_Send("NetConf","RobotToPC")
+        $TIMER[1]=0
+      ENDIF
+    ENDIF
+
+    ;ENDFOLD (USER PLC)
+  ENDLOOP
+
+  RET=EKI_Clear("NetConf")
+END
