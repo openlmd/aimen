@@ -878,9 +878,21 @@ PROC main()
               ELSE
                 ok :=SERVER_BAD_MSG;
               ENDIF
-                  DEFAULT:
-                      TPWrite "SERVER: Illegal instruction code", \Num:=instructionCode;
-                      ok := SERVER_BAD_MSG;
+            CASE 200: !Stop layer
+              IF nParams = 1 THEN
+                stop_layer := params{1} <> 0;
+              ELSE
+                ok :=SERVER_BAD_MSG;
+              ENDIF
+            CASE 201: !Diference between actual and programmed height
+              IF nParams = 1 THEN
+                height_compensation := params{1};
+              ELSE
+                ok :=SERVER_BAD_MSG;
+              ENDIF
+            DEFAULT:
+              TPWrite "SERVER: Illegal instruction code", \Num:=instructionCode;
+              ok := SERVER_BAD_MSG;
         ENDTEST
 
         !Compose the acknowledge string to send back to the client

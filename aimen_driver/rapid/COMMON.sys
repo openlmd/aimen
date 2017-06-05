@@ -49,6 +49,9 @@ PERS robtarget circPoint;
 PERS bool frameMutex:=FALSE;
 PERS bool connectMutex := FALSE;
 
+!Layer process
+PERS bool stop_layer := FALSE;
+PERS num height_compensation := 0.0;
 
 PERS bool trajectory_lock := FALSE;
 PERS bool new_trajectory := FALSE;

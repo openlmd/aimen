@@ -102,6 +102,10 @@ class NdRobotServer():
                 return self.server_robot.reset_powder()
             elif cmd == 'reset_wire':
                 return self.server_robot.reset_wire()
+            elif cmd == 'stop_layer':
+                return self.server_robot.stop_layer(command[cmd])
+            elif cmd == 'height_deviation':
+                return self.server_robot.height_comp(command[cmd])
             else:
                 return 'ERR_COMMAND'
                 print 'Unknown command:', cmd

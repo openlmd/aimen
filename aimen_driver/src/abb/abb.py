@@ -107,6 +107,20 @@ class Robot:
         msg = "100 #"
         return self.send(msg, response)
 
+    def set_stop_layer(self, deviation, response=True):
+        '''
+        Finish addind compensation layers in the claddin process
+        '''
+        msg = "200 " + str(bool(stop)) + " #"
+        return self.send(msg, response)
+
+    def height_compensation(self, deviation, response=True):
+        '''
+        Height compensation to correct the layer deviation
+        '''
+        msg = "201 " + str(float(deviation)) + " #"
+        return self.send(msg, response)
+
     def r_laser(self, response=True):
         '''
         Stop and reset laser signals.

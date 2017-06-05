@@ -378,6 +378,12 @@ class ServerRobot(Robot):
             turntable = int((turntablespeed * 100) / 10)  # digital value
             return self.set_analog((turntable, 0))  # gtv_disk
 
+    def stop_layer(self, stop):
+        return self.set_stop_layer(stop)
+
+    def height_comp(self, deviation):
+        return self.height_compensation(deviation)
+
     def cancel(self):
         return self.cancel_motion()
 
