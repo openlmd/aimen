@@ -18,12 +18,11 @@ class NdRobotLogger():
                                      'joint_4', 'joint_5', 'joint_6']
         self.msg_joint_state.position = [0, 0, 0, 0, 0, 0]
 
-        robot_ip = rospy.get_param('~robot_ip', '172.31.1.100')
+        robot_ip = rospy.get_param('~robot_ip', '172.31.1.147')
 
         self.logger_robot = LoggerRobot()
-        #self.logger_robot.connect(robot_ip)
         connected = False
-        for i in range(10):
+        for i in range(5):
             try:
                 self.logger_robot.connect(robot_ip)
                 connected = True
@@ -33,20 +32,26 @@ class NdRobotLogger():
                 rospy.logerr('Timed out')
                 rospy.sleep(1)
                 continue
-            except socket.error:
+            except socket.error as e:
                 print 'Network is unreachable'
-                rospy.logerr('Network is unreachable')
+                rospy.logerr(str(e))
                 rospy.sleep(1)
                 continue
         if not connected:
             rospy.signal_shutdown('Socket timed out')
             rospy.spin()
             return
+        rospy.logwarn('Connected')
         self.talker()
 
     def talker(self):
+        fails = 0
         while not rospy.is_shutdown():
-            if not self.logger_robot.read_raw_logger():
+            if not self.logger_robot.read_xml_logger():
+                rospy.logwarn('Read fail')
+                if fails < 10:
+                    fails = fails + 1
+                    continue
                 break
             if len(self.logger_robot.float_joints) > 0:
                 self.msg_joint_state.header.stamp = rospy.Time.now()
@@ -55,6 +60,8 @@ class NdRobotLogger():
                     self.msg_joint_state.position[i] = (
                         np.deg2rad(joints_pose[i]))
                 self.pub.publish(self.msg_joint_state)
+            else:
+                rospy.logwarn('No joints read')
             rospy.sleep(0.01)
         self.logger_robot.disconnect()
 

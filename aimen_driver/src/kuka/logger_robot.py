@@ -4,14 +4,16 @@ from kuka import Robot
 
 class LoggerRobot(Robot):
     def __init__(self):
-        #self.robot = abb.Robot()
         Robot.__init__(self)
 
     def connect(self, ip):
         self.control = True
-        self.connect_logger((ip, 5001))
+        self.connect_logger((ip, 59152))
+        #TODO: Ler porto da configuracion
 
     def disconnect(self):
+        self.conn.close()
+        self.s.close()
         self.s.shutdown(socket.SHUT_RDWR)
 
 

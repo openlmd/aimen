@@ -22,8 +22,8 @@ class Robot:
     def __init__(self):
         self.control = True
         self.delay = .08
-        TCP_IP = '172.31.1.100'
-        TCP_PORT = 59152
+        self.TCP_IP = '172.31.1.100'
+        self.TCP_PORT = 59152
 
     def connect_logger(self, remote, maxlen=10):
         self.pose = deque(maxlen=maxlen)
@@ -31,9 +31,11 @@ class Robot:
         self.float_joints = deque(maxlen=maxlen)
 
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #self.s.bind((TCP_IP,TCP_PORT))
-        self.s.connect(remote)
-        self.s.setblocking(1)
+        self.s.bind(remote)
+        self.s.listen(1)
+        self.conn, addr = self.s.accept()
+        #self.s.connect(remote)
+        #self.s.setblocking(1)
 
     def read_logger(self):
         '''Unpack data from xml file'''
@@ -61,14 +63,22 @@ class Robot:
         Decode robot axis positions from a Kuka xml message
         '''
         try:
-            data = self.s.recv(512)
-            if data:
-                data_XML = self.recibirXML(data)
-                if len(data[0] == 6):
-                    for axis in data_XML[0]:
-                        self.float_joints.append(axis)
+            data = self.conn.recv(512)
+            if len(data) > 125:
+                data_XML = self.recibirXML(data[0:126])
+                axis = data_XML.find('Axis')
+                if axis is not None:
+                    self.float_joints.append((float(axis.attrib['A1']),
+                        float(axis.attrib['A2']), float(axis.attrib['A3']),
+                        float(axis.attrib['A4']), float(axis.attrib['A5']),
+                        float(axis.attrib['A6'])))
+                    #TODO: comprobar se existen
             return True
         except socket.error, e:
+            print str(e)
+            return False
+        except UnicodeDecodeError as e:
+            print str(e)
             return False
 
     def recibirXML(self, sender):
