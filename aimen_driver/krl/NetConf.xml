@@ -1,7 +1,7 @@
 <ETHERNETKRL>
 	<CONFIGURATION>
 		<EXTERNAL>
-			<IP>172.18.0.3</IP>
+			<IP>172.31.1.100</IP>
 			<PORT>59152</PORT>
 			<TYPE>Server</TYPE>
 		</EXTERNAL>
@@ -9,7 +9,7 @@
 		  <ENVIRONMENT>Submit</ENVIRONMENT>
 		  <TIMEOUT Connect="2000"/>
 		  <ALIVE Set_Flag="100" Ping="5"/>
-		  <IP>172.18.0.4</IP>
+		  <IP>172.31.1.147</IP>
 		  <PORT>59152</PORT>
 		  <PROTOCOL>TCP</PROTOCOL>
 		</INTERNAL>

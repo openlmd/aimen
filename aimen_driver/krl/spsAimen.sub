@@ -1,0 +1,125 @@
+&ACCESS RVEO
+&REL 1
+&COMMENT PLC on control
+DEF  SPS ( )
+  ;FOLD DECLARATIONS
+  ;FOLD BASISTECH DECL
+  ;Automatik extern
+    DECL STATE_T STAT
+    DECL MODUS_T MODE
+  ;ENDFOLD (BASISTECH DECL)
+  ;FOLD USER DECL
+  ; Please insert user defined declarations
+    DECL EKI_STATUS RET 
+    DECL AXIS ROBAXIS    
+  ;ENDFOLD (USER DECL)
+  ;ENDFOLD (DECLARATIONS)
+  ;FOLD INI
+  ;FOLD AUTOEXT INIT
+    INTERRUPT DECL 91 WHEN $PRO_STATE1==#P_FREE DO RESET_OUT ()
+    INTERRUPT ON 91
+    $LOOP_MSG[]="                                                            "
+    MODE=#SYNC
+    $H_POS=$H_POS
+    ;Automatik extern
+    IF $MODE_OP==#EX THEN
+      CWRITE($CMD,STAT,MODE,"RUN /R1/CELL()")
+    ENDIF
+  ;ENDFOLD (AUTOEXT INIT)
+  ;FOLD BACKUPMANAGER PLC INIT
+    BM_ENABLED = FALSE
+    BM_OUTPUTVALUE = 0
+  ;ENDFOLD (BACKUPMANAGER PLC INIT)
+  ;FOLD TQM_INIT
+    TorqueDefinitions()
+  ;ENDFOLD (TQM_INIT)
+  ;FOLD ATB_PLC Init
+    ATB_PLC_Init()
+  ;ENDFOLD (ATB_PLC Init)
+  ;FOLD ATA_PLC Init
+    ATA_SetMasterIdent()
+  ;ENDFOLD (ATA_PLC Init)
+  ;FOLD USER INIT
+  ; Please insert user defined initialization commands
+    ROBAXIS={A1 0,A2 0,A3 0,A4 0,A5 0,A6 0}
+  ;ENDFOLD (USER INIT)
+  ;ENDFOLD (INI)
+
+  RET=EKI_Init("NetConf")
+    WAIT SEC 0.5
+  RET=EKI_Open("NetConf")
+  wait for $FLAG[100]
+
+  LOOP
+    $TIMER_STOP[1]=FALSE
+    WAIT FOR NOT($POWER_FAIL)
+    TORQUE_MONITORING()
+    ;FOLD BACKUPMANAGER PLC
+    IF BM_ENABLED THEN
+      BM_OUTPUTSIGNAL = BM_OUTPUTVALUE
+    ENDIF
+    ;ENDFOLD (BACKUPMANAGER PLC)
+  ;FOLD ARS PLC LOOP
+    ARS_PLC_LOOP()
+  ;ENDFOLD ;(ARS PLC LOOP)
+  ;FOLD ATB PLC Loop
+    ATB_PLC_Loop()
+  ;ENDFOLD (ATB PLC Loop)
+  ;FOLD ATA PLC Loop
+    ATA_PLC_Loop()
+    ATA_PrepStateWatch()
+    ATA_VelTrans_Loop()
+  ;ENDFOLD (ATA PLC Loop)
+    ;FOLD USER PLC
+    ;Make your modifications here
+    
+     IF $FLAG[100]==FALSE THEN
+      RET=EKI_Open("NetConf") ;?
+      WAIT FOR $FLAG[100]
+    ELSE
+      IF $TIMER[1]>20 THEN
+        ROBAXIS = $AXIS_ACT
+        ;RET = EKI_SetReal("NetConf","RobotToPC/Axis",ROBAXIS)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A1",ROBAXIS.A1)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A2",ROBAXIS.A2)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A3",ROBAXIS.A3)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A4",ROBAXIS.A4)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A5",ROBAXIS.A5)
+        RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A6",ROBAXIS.A6)
+        RET = EKI_Send("NetConf","RobotToPC")
+        $TIMER[1]=0
+      ENDIF
+    ENDIF
+
+    ;ENDFOLD (USER PLC)
+  ENDLOOP
+  
+  RET=EKI_Clear("NetConf")
+
+  ;FOLD ;%{H}
+  ;FOLD
+END
+  ;ENDFOLD
+
+
+DEF  RESET_OUT ( )
+  INT N
+  MsgLoop(" ")
+  IF REFLECT_PROG_NR == 1 THEN
+    FOR N = 0 TO PGNO_LENGTH - 1
+      $OUT[PGNO_FBIT_REFL + N] = FALSE
+    ENDFOR
+  ENDIF
+  IF (PGNO_REQ>0) THEN
+    $OUT[PGNO_REQ]=FALSE
+  ELSE
+    IF (PGNO_REQ<0) THEN
+      $OUT[-PGNO_REQ]=TRUE
+    ENDIF
+  ENDIF
+END
+
+;FOLD USER SUBROUTINE
+; Integrate your user defined subroutines
+;ENDFOLD (USER SUBROUTINE)
+;ENDFOLD

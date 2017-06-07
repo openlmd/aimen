@@ -25,12 +25,16 @@ DEF sps( )
     ;Make your modifications here
     ; wait until server is conntected
 
-    EKI_CHECK(RET,#STATE,"NetConf")
+    ;EKI_CHECK(RET,#STATE,"NetConf")
+    ;TODO: Probar a reconexion
     IF $FLAG[100]==FALSE THEN
-      ;RET=EKI_Open("NetConf") ;É necesario?
+      RET=EKI_Clear("NetConf")
+      RET=EKI_Init("NetConf")
+        WAIT SEC 0.5
+      RET=EKI_Open("NetConf")
       WAIT FOR $FLAG[100]
     ELSE
-      IF $TIMER[1]>24 THEN
+      IF $TIMER[1]>20 THEN
         ROBAXIS = $AXIS_ACT
         ;RET = EKI_SetReal("NetConf","RobotToPC/Axis",ROBAXIS)
         RET = EKI_SetReal("NetConf","RobotToPC/Axis/@A1",ROBAXIS.A1)
